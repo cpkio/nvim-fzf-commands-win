@@ -34,7 +34,7 @@ return function(options)
       end
     end
 
-    local head = 'Reg   Col'
+    local head = 'Mark  Col'
     local tip = term.green .. 'CTRL-T' .. term.reset .. ' to open in new tab. ' ..
                 term.green .. 'CTRL-S' .. term.reset .. ' to open in split. ' ..
                 term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
