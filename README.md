@@ -15,7 +15,7 @@ Environment variables I use by default:
 * [x] Files
 * [x] Marks
 * [x] Registers
-* [ ] Buffers
+* [x] Buffers
 * [ ] BLines
 * [ ] Lines
 * [ ] Filetypes
