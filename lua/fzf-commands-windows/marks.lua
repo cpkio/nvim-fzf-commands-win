@@ -4,9 +4,19 @@ local fn, api = utils.helpers()
 
 
 return function(options)
+
+  local preview
+  if fn.executable("bat") == 1 then
+    -- Adding {} to preview command is needed for me because other preview
+    -- placeholders can be other ones
+    preview = vim.env.FZF_PREVIEW_COMMAND .. ' {3}'
+  else
+    preview = 'type "$0"'
+  end
+
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = "--ansi --multi --expect=ctrl-t,ctrl-s,ctrl-v,ctrl-q"
+    local opts = ('--header-lines=2 --ansi --multi --expect=ctrl-t,ctrl-s,ctrl-v,ctrl-q --prompt="Marks> " --preview=%s'):format(fn.shellescape(preview))
     local items = {}
 
     local mrklist = ('%s'):format(api.exec('marks', { output = true }))
@@ -17,12 +27,21 @@ return function(options)
       if mrk then
         mrk = string.gsub(mrk, [[\(.)]], '%1')
         mrkdata = string.gsub(mrkdata, [[\(.)]], '%1')
-        local item_string = string.format("%-16s", term.red .. ' ' .. tostring(mrk) .. ' ' .. term.reset) ..
+        local item_string = string.format("%-20s", term.red .. ' ' .. tostring(mrk) .. ' ' .. term.reset) ..
                             string.format("%-20s", term.brightblue .. tostring(ln) .. term.reset) ..
                             mrkdata
         table.insert(items, item_string)
       end
     end
+
+    local head = 'Reg   Col'
+    local tip = term.green .. 'CTRL-T' .. term.reset .. ' to open in new tab. ' ..
+                term.green .. 'CTRL-S' .. term.reset .. ' to open in split. ' ..
+                term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
+                term.green .. 'CTRL-Q' .. term.reset .. ' to delete mark(s). '
+
+    table.insert(items, 1, head)
+    table.insert(items, 1, tip)
 
     local lines = options.fzf(items, opts)
     if not lines then
@@ -42,8 +61,8 @@ return function(options)
     elseif lines[1] == "ctrl-q" then
       for i = 2, #lines do
         local m, _ = string.match(lines[i], '^%s*(%S*)')
-        if m == '"' then m = [[\"]] end -- обработка случая, когда марка является двойной кавычкой
-        if m == "'" then m = [[\']] end -- обработка случая, когда марка является ординарной кавычкой
+        if m == '"' then m = [[\"]] end -- if we meet double quote in output stream
+        if m == "'" then m = [[\']] end -- if we meet single quote in output stream
         cmd = "delmark " .. m
         api.command(cmd)
         vim.notify('Mark ' .. m .. ' deleted')

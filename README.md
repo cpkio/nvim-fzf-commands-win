@@ -14,6 +14,23 @@ Environment variables I use by default:
 
 * [x] Files
 * [x] Marks
+* [ ] Registers
 * [ ] Buffers
-* [ ] BufferLines
-* [ ] BufferLinesAll
+* [ ] BLines
+* [ ] Lines
+* [ ] Filetypes
+* [ ] GFiles
+* [ ] GFiles?
+* [ ] Tags
+* [ ] BTags
+* [ ] Windows
+* [ ] History
+* [ ] History:
+* [ ] History/
+* [ ] Commits
+* [ ] BCommits
+
+## Should I?
+
+* Helptags
+* Snippets
