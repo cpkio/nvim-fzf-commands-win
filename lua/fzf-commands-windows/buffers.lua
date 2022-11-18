@@ -31,6 +31,9 @@ return function(options)
       if bufnum then
         -- reg = string.gsub(reg, [[\(.)]], '%1') -- Unescape
         -- regdata = string.gsub(regdata, [[\(.)]], '%1') -- Unescape
+        if filepath == "" then
+          filepath = "[No name]"
+        end
         local item_string = string.format("%-18s", term.red .. ' ' .. tostring(bufnum) .. ' ' .. term.reset) ..
                             string.format("%-20s", term.green .. ' ' .. tostring(status) .. ' ' .. term.reset) ..
                             filepath
