@@ -19,6 +19,7 @@ Environment variables I use by default:
 * [ ] BLines
 * [ ] Lines
 * [ ] Filetypes
+* [ ] Rg
 * [ ] GFiles
 * [ ] GFiles?
 * [ ] Tags

@@ -13,5 +13,6 @@ M.marks = run_module("fzf-commands-windows.marks")
 M.registers = run_module("fzf-commands-windows.registers")
 M.buffers = run_module("fzf-commands-windows.buffers")
 M.bufferlines = run_module("fzf-commands-windows.bufferlines")
+M.rg = run_module("fzf-commands-windows.rg")
 
 return M
