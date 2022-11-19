@@ -7,7 +7,7 @@ local utils = require "fzf-commands-windows.utils"
 
 local fn, api = utils.helpers()
 
-local function files(opts)
+return function(opts)
 
   opts = utils.normalize_opts(opts)
   local command
@@ -49,6 +49,4 @@ local function files(opts)
 
   end)()
 end
-
-return files
 
