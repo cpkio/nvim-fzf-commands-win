@@ -13,6 +13,8 @@ M.marks = run_module("fzf-commands-windows.marks")
 M.registers = run_module("fzf-commands-windows.registers")
 M.buffers = run_module("fzf-commands-windows.buffers")
 M.bufferlines = run_module("fzf-commands-windows.bufferlines")
+M.lines = run_module("fzf-commands-windows.lines")
 M.rg = run_module("fzf-commands-windows.rg")
+M.gdiff = run_module("fzf-commands-windows.gdiff")
 
 return M
