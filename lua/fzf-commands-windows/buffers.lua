@@ -6,11 +6,9 @@ return function(options)
 
   -- port from fzf.vim
   local function locate(bufnum)
-    print(bufnum)
     for tab = 1, vim.fn.tabpagenr('$') do
       local buffers = vim.fn.tabpagebuflist(tab)
       for k, buf in pairs(buffers) do
-        print(buf)
         if bufnum == buf then
           return tab, k
         end
@@ -21,7 +19,7 @@ return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--header-lines=2 --ansi --multi --expect=ctrl-q --prompt="Buffers> "')
+    local opts = ('--header-lines=2 --ansi --multi --expect=ctrl-q,ctrl-s,ctrl-v,ctrl-t --prompt="Buffers> "')
     local items = {}
 
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
@@ -42,7 +40,10 @@ return function(options)
     end
 
     local head = ' #    ?     file'
-    local tip = term.green .. 'CTRL-Q' .. term.reset .. ' to delete buffer(s). '
+    local tip = term.green .. 'CTRL-Q' .. term.reset .. ' to delete buffer(s). ' ..
+                term.green .. 'CTRL-S' .. term.reset .. ' to open in horizontal split. ' ..
+                term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
+                term.green .. 'CTRL-T' .. term.reset .. ' to open in new tab. '
 
     table.insert(items, 1, head)
     table.insert(items, 1, tip)
@@ -54,14 +55,43 @@ return function(options)
 
     local cmd
     if lines[1] == "" then -- you can go only to one buffer on keypress
-      local bufnum, _ = string.match(lines[2], '^%s*(%d+)')
-      local t, w = locate(tonumber(bufnum))
-      api.command(t .. 'tabnext')
-      api.command(w .. 'wincmd w')
-    elseif lines[1] == "ctrl-q" then
+      local bufnum, _ = tonumber(string.match(lines[2], '^%s*(%d+)'))
+      local bufinfo = fn.getbufinfo(bufnum)[1]
+      if bufinfo.hidden == 1 then
+        api.win_set_buf(fn.win_getid(), bufnum)
+      end
+      if bufinfo.hidden == 0 then
+        local t, w = locate(bufnum)
+        api.command(t .. 'tabnext')
+        api.command(w .. 'wincmd w')
+        api.win_set_buf(fn.bufwinid(bufnum),bufnum)
+      end
+    end
+    if lines[1] == "ctrl-q" then
       for i = 2, #lines do
         local bufnum, _ = string.match(lines[i], '^%s*(%d+)')
         cmd = 'bdelete! ' .. bufnum
+        api.command(cmd)
+      end
+    end
+    if lines[1] == "ctrl-s" then
+      for i = 2, #lines do
+        local bufnum, _ = tonumber(string.match(lines[i], '^%s*(%d+)'))
+        cmd = 'split ' .. fn.getbufinfo(bufnum)[1].name
+        api.command(cmd)
+      end
+    end
+    if lines[1] == "ctrl-v" then
+      for i = 2, #lines do
+        local bufnum, _ = tonumber(string.match(lines[i], '^%s*(%d+)'))
+        cmd = 'vsplit ' .. fn.getbufinfo(bufnum)[1].name
+        api.command(cmd)
+      end
+    end
+    if lines[1] == "ctrl-t" then
+      for i = 2, #lines do
+        local bufnum, _ = string.match(lines[i], '^%s*(%d+)')
+        cmd = 'tabnew ' .. fn.getbufinfo(bufnum)[1].name
         api.command(cmd)
       end
     end
