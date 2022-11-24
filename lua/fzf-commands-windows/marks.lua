@@ -48,27 +48,41 @@ return function(options)
       return
     end
 
-    local mrk, _ = string.match(lines[2], '^%s*(%S*)')
-    local cmd = "normal! `" .. mrk .. "zz"
 
     if lines[1] == "" then
-    elseif lines[1] == "ctrl-t" then
-      cmd = "tab split | " .. cmd
-    elseif lines[1] == "ctrl-v" then
-      cmd = "vertical split | " .. cmd
-    elseif lines[1] == "ctrl-s" then
-      cmd = "split | " .. cmd
-    elseif lines[1] == "ctrl-q" then
+        local mrk, _ = string.match(lines[2], '^%s*(%S*)')
+        local cmd = "normal! `" .. mrk .. "zz"
+    end
+    if lines[1] == "ctrl-t" then
+      for i = 2, #lines do
+        local mrk, _ = string.match(lines[i], '^%s*(%S*)')
+        local cmd = "normal! `" .. mrk .. "zz"
+        cmd = "tab split | " .. cmd
+      end
+    end
+    if lines[1] == "ctrl-v" then
+      for i = 2, #lines do
+        local mrk, _ = string.match(lines[i], '^%s*(%S*)')
+        local cmd = "normal! `" .. mrk .. "zz"
+        cmd = "vertical split | " .. cmd
+      end
+    end
+    if lines[1] == "ctrl-s" then
+      for i = 2, #lines do
+        local mrk, _ = string.match(lines[i], '^%s*(%S*)')
+        local cmd = "normal! `" .. mrk .. "zz"
+        cmd = "split | " .. cmd
+      end
+    end
+    if lines[1] == "ctrl-q" then
       for i = 2, #lines do
         local m, _ = string.match(lines[i], '^%s*(%S*)')
         if m == '"' then m = [[\"]] end -- if we meet double quote in output stream
         if m == "'" then m = [[\']] end -- if we meet single quote in output stream
-        cmd = "delmark " .. m
+        local cmd = "delmark " .. m
         api.command(cmd)
-        vim.notify('Mark ' .. m .. ' deleted')
       end
-      cmd = "echo Marks deleted"
+      api.command('wshada!')
     end
-    api.command(cmd)
   end)()
 end
