@@ -46,13 +46,15 @@ return function(options)
         cmd = 'silent put ' .. reg
         api.command(cmd)
       end
-    elseif lines[1] == "ctrl-p" then
+    end
+    if lines[1] == "ctrl-p" then
       for i = 2, #lines do
         local reg, _ = string.match(lines[i], '^%s*(%S)')
         cmd = 'silent put! ' .. reg
         api.command(cmd)
       end
-    elseif lines[1] == "ctrl-q" then
+    end
+    if lines[1] == "ctrl-q" then
       for i = 2, #lines do
         local reg, _ = string.match(lines[i], '^%s*(%S)')
         cmd = 'let @' .. reg .. '=""'
