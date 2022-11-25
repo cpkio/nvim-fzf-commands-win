@@ -9,7 +9,7 @@ return function(opts)
   opts = utils.normalize_opts(opts)
   coroutine.wrap(function ()
     local fname = fn.fnamemodify(api.buf_get_name(0), ":t") -- барахлит функция на многооконных раскладках, но ладно
-    local gitsrc = "git log --all --pretty=format:%H" .. d_delimiter .."%d" .. d_delimiter .. "%s -- **/".. fname
+    local gitsrc = "git log --all --pretty=format:%H" .. d_delimiter .."%s" .. d_delimiter .. "%d -- **/".. fname
     local fzfpreview = "git diff {1} -- **/" .. fname .. " | delta --wrap-max-lines=0" ..
     ' --file-style=white                               ' ..
 
