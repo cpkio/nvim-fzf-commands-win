@@ -4,7 +4,7 @@ local action = require "fzf.actions".action
 
 local fn, api = utils.helpers()
 
-local rg_delimiter='‧'
+local rg_delimiter=' '
 
 local function open_file(window_cmd, filename, row, col)
   vim.cmd(window_cmd .. " ".. vim.fn.fnameescape(filename))
