@@ -22,7 +22,7 @@ return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--reverse --header-lines=0 --multi --expect=alt-enter --ansi --prompt="Lines> "')
+    local opts = ('--reverse --header-lines=1 --multi --ansi --prompt="Lines> "')
     local items = {}
 
     -- Loading buffers list
@@ -56,63 +56,37 @@ return function(options)
       end
     end
 
+    local tip = term.green .. 'ENTER' .. term.reset .. ' to push to Quickfix list.'
+
+    table.insert(items, 1, tip)
+
     local lines = options.fzf(items, opts)
     if not lines then
       return
     end
 
-    print(vim.inspect(lines))
-
-    if lines[1] == "" then
-      if #lines == 2 then
-        local _b, _, _l = string.match(lines[2], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)')
-        local buf = tonumber(_b); local ln = tonumber(_l)
-        local bufinfo = fn.getbufinfo(buf)[1]
-        if bufinfo.hidden == 1 then
-          api.win_set_buf(fn.win_getid(), buf)
-          api.win_set_cursor(fn.win_getid(), { tonumber(ln), 0 })
-        end
-        if bufinfo.hidden == 0 then
-          local _t, _w = locate(buf)
-          api.command(_t .. 'tabnext')
-          api.command(_w .. 'wincmd w')
-          api.win_set_cursor(api.get_current_win(), { tonumber(_l), 0 })
-        end
-      else
-        local itemsqf = {}
-        for j = 2, #lines do
-          local _b, _f, _l, _t = string.match(lines[j], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)%s*' .. rg_delimiter .. '%s*(%S.+)')
-          table.insert(itemsqf, { bufnr = tonumber(_b), filename = _f, lnum = tonumber(_l), text = _t})
-        end
-        fn.setqflist({},'r',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
-        api.command('copen')
+    if #lines == 1 then
+      local _b, _, _l = string.match(lines[1], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)')
+      local buf = tonumber(_b); local ln = tonumber(_l)
+      local bufinfo = fn.getbufinfo(buf)[1]
+      if bufinfo.hidden == 1 then
+        api.win_set_buf(fn.win_getid(), buf)
+        api.win_set_cursor(fn.win_getid(), { tonumber(ln), 0 })
       end
-    end
-
-    if lines[1] == "alt-enter" then
-      if #lines == 2 then
-        local _b, _, _l = string.match(lines[2], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)')
-        local buf = tonumber(_b); local ln = tonumber(_l)
-        local bufinfo = fn.getbufinfo(buf)[1]
-        if bufinfo.hidden == 1 then
-          api.win_set_buf(fn.win_getid(), buf)
-          api.win_set_cursor(api.get_current_win(), { tonumber(ln), 0 })
-        end
-        if bufinfo.hidden == 0 then
-          local _t, _w = locate(buf)
-          api.command(_t .. 'tabnext')
-          api.command(_w .. 'wincmd w')
-          api.win_set_cursor(fn.win_getid(), { tonumber(_l), 0 })
-        end
-      else
-        local itemsqf = {}
-        for j = 2, #lines do
-          local _b, _f, _l, _t = string.match(lines[j], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)%s*' .. rg_delimiter .. '%s*(%S.+)')
-          table.insert(itemsqf, { bufnr = tonumber(_b), filename = _f, lnum = tonumber(_l), text = _t})
-        end
-        fn.setloclist(fn.win_getid(), {},'r',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
-        api.command('lopen')
+      if bufinfo.hidden == 0 then
+        local _t, _w = locate(buf)
+        api.command(_t .. 'tabnext')
+        api.command(_w .. 'wincmd w')
+        api.win_set_cursor(api.get_current_win(), { tonumber(_l), 0 })
       end
+    else
+      local itemsqf = {}
+      for j = 1, #lines do
+        local _b, _f, _l, _t = string.match(lines[j], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)%s*' .. rg_delimiter .. '%s*(%S.+)')
+        table.insert(itemsqf, { bufnr = tonumber(_b), filename = _f, lnum = tonumber(_l), text = _t})
+      end
+      fn.setqflist({},'r',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
+      api.command('copen')
     end
 
   end)()
