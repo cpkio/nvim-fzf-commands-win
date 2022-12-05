@@ -5,7 +5,7 @@ local fn, api = utils.helpers()
 return function(options)
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--header-lines=2 --ansi --multi --expect=ctrl-p,ctrl-q --prompt="Registers> "')
+    local opts = (term.fzf_colors .. '--header-lines=2 --ansi --multi --expect=ctrl-p,ctrl-q --prompt="Registers> "')
     local items = {}
 
     local reglist = ('%s'):format(api.exec('registers', { output = true }))

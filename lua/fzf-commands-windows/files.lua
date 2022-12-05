@@ -1,10 +1,8 @@
 -- For now files list from `fd` is pushed directly to output stream. Will not
 -- mangle it for now to add hints & tips strings.
 
-local fzf = require "fzf".fzf
-
 local utils = require "fzf-commands-windows.utils"
-
+local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
 return function(opts)
@@ -28,7 +26,7 @@ return function(opts)
 
   coroutine.wrap(function ()
     local choices = opts.fzf(command,
-      ('--expect=ctrl-s,ctrl-t,ctrl-v --prompt="Files> " --multi --preview=%s'):format(fn.shellescape(preview)))
+      (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v --prompt="Files> " --multi --preview=%s'):format(fn.shellescape(preview)))
 
     if not choices then return end
 
@@ -43,6 +41,8 @@ return function(opts)
       vimcmd = "e"
     end
 
+    -- воспользоваться встроенной функцией list_slice
+    -- не забывать и о list_extend, vim.split()
     for i=2, #choices do
       vim.cmd(vimcmd .. " " .. fn.fnameescape(choices[i]))
     end

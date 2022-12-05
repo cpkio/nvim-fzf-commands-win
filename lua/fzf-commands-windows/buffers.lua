@@ -19,7 +19,7 @@ return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--header-lines=2 --ansi --multi --expect=ctrl-q,ctrl-s,ctrl-v,ctrl-t --prompt="Buffers> "')
+    local opts = (term.fzf_colors .. '--header-lines=2 --ansi --multi --expect=ctrl-q,ctrl-s,ctrl-v,ctrl-t --prompt="Buffers> "')
     local items = {}
 
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
@@ -53,6 +53,13 @@ return function(options)
       return
     end
 
+    -- TODO Эта функция не сработает, если нужный нам буфер находится в фоне
+    -- Нужно вызывать функцию nvim_win_set_buf и передавать ей window handle,
+    -- который похоже начинается от 1000, и номер буфера
+    -- fn.bufwinid возвращает окно только если буфер в этом окне показывается!
+    -- Вообще получается, что скрытый буфер ни с каким окном не связан,
+    -- а значит его можно показывать прямо на месте? Опять-таки, скрытые
+    -- буфера можно открывать в новых вкладках, новых сплитах
     local cmd
     if lines[1] == "" then -- you can go only to one buffer on keypress
       local bufnum, _ = tonumber(string.match(lines[2], '^%s*(%d+)'))

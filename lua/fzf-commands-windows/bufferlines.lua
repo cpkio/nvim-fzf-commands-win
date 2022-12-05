@@ -5,7 +5,7 @@ local fn, api = utils.helpers()
 return function(options)
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--reverse --header-lines=1 --multi --expect=ctrl-l --ansi --prompt="BLines> "')
+    local opts = (term.fzf_colors .. '--reverse --header-lines=1 --multi --expect=ctrl-l --ansi --prompt="BLines> "')
     local items = {}
 
     local buflines = api.buf_get_lines(0,0,-1,0)

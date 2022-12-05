@@ -16,7 +16,7 @@ return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--header-lines=2 --ansi --multi --expect=ctrl-t,ctrl-s,ctrl-v,ctrl-q --prompt="Marks> " --preview=%s'):format(fn.shellescape(preview))
+    local opts = (term.fzf_colors .. '--header-lines=2 --ansi --multi --expect=ctrl-t,ctrl-s,ctrl-v,ctrl-q --prompt="Marks> " --preview=%s'):format(fn.shellescape(preview))
     local items = {}
 
     local mrklist = ('%s'):format(api.exec('marks', { output = true }))

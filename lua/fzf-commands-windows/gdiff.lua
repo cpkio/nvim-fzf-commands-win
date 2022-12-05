@@ -33,7 +33,7 @@ return function(opts)
     '--line-numbers-zero-style=white                  ' ..
     '--line-numbers-plus-style=yellow                 ' ..
     '--width=%FZF_PREVIEW_COLUMNS%'
-    local fzfcommand = '--prompt="GDiff> " --delimiter=' .. d_delimiter .. ' --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
+    local fzfcommand = term.fzf_colors .. '--prompt="GDiff> " --delimiter=' .. d_delimiter .. ' --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
     local choices = opts.fzf(gitsrc, fzfcommand) -- проблема в fzfcommand
     if not choices then return end
   end)()
