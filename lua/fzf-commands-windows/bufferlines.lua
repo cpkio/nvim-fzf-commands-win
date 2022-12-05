@@ -5,7 +5,7 @@ local fn, api = utils.helpers()
 return function(options)
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = ('--reverse --header-lines=0 --multi --expect=alt-enter --ansi --prompt="BLines> "')
+    local opts = ('--reverse --header-lines=1 --multi --expect=ctrl-l --ansi --prompt="BLines> "')
     local items = {}
 
     local buflines = api.buf_get_lines(0,0,-1,0)
@@ -17,6 +17,11 @@ return function(options)
       end
     end
 
+    local tip = term.green .. 'ENTER' .. term.reset .. ' to push to Quickfix list. ' ..
+                term.green .. 'CTRL-L' .. term.reset .. ' to push to Locations list. '
+
+    table.insert(items, 1, tip)
+
     local lines = options.fzf(items, opts)
     if not lines then
       return
@@ -24,7 +29,7 @@ return function(options)
 
     if lines[1] == "" then
       if #lines == 2 then
-        local linenum, _ = string.match(lines[1], '^%s*(%d+)')
+        local linenum, _ = string.match(lines[2], '^%s*(%d+)')
         api.command(linenum)
       else
         local bufnum = api.get_current_buf()
@@ -37,9 +42,9 @@ return function(options)
         api.command('copen')
       end
     end
-    if lines[1] == "alt-enter" then
+    if lines[1] == "ctrl-l" then
       if #lines == 2 then
-        local linenum, _ = string.match(lines[1], '^%s*(%d+)')
+        local linenum, _ = string.match(lines[2], '^%s*(%d+)')
         api.command(linenum)
       else
         local bufnum = api.get_current_buf()
