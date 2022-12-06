@@ -1,6 +1,6 @@
 local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
-local action = require "fzf.actions".action
+-- local action = require "fzf.actions".action
 
 local fn, api = utils.helpers()
 
@@ -25,7 +25,7 @@ local function parse_vimgrep_line(line)
   }
 end
 
-  local has_bat = vim.fn.executable("bat")
+local has_bat = vim.fn.executable("bat")
 
 return function(opts, pattern)
   local prompt = "Rg> "

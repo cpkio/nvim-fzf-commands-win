@@ -16,5 +16,7 @@ M.bufferlines = run_module("fzf-commands-windows.bufferlines")
 M.lines = run_module("fzf-commands-windows.lines")
 M.rg = run_module("fzf-commands-windows.rg")
 M.gdiff = run_module("fzf-commands-windows.gdiff")
+M.filetypes = run_module("fzf-commands-windows.filetypes")
+M.ctags = run_module("fzf-commands-windows.ctags")
 
 return M
