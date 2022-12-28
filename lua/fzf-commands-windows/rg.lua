@@ -14,15 +14,28 @@ local function open_file(window_cmd, filename, row, col)
 end
 
 local function parse_vimgrep_line(line)
-  local parsed_content = {string.match(line, "(.-)" .. rg_delimiter .. "(%d+)" .. rg_delimiter .. "(%d+)" .. ".*")}
+  local parsed_content = {string.match(line, "(.-)" .. rg_delimiter .. "(%d+)" .. rg_delimiter .. "(%d+)" .. rg_delimiter .. "(.*)")}
   local filename = parsed_content[1]
   local row = tonumber(parsed_content[2])
   local col = tonumber(parsed_content[3])
+  local text = parsed_content[4]
   return {
     filename = filename,
     row = row,
-    col = col
+    col = col,
+    text = text
   }
+end
+
+local function open_files(cmd, choices)
+  for i=2,#choices do
+    local choice = choices[i]
+    local parsed_content = parse_vimgrep_line(choice)
+    open_file(cmd,
+      parsed_content.filename,
+      parsed_content.row,
+      parsed_content.col)
+  end
 end
 
 local has_bat = vim.fn.executable("bat")
@@ -46,27 +59,25 @@ return function(opts, pattern)
 
     if not choices then return end
 
-    local cmd
-
     if choices[1] == "" then
-      cmd = "e"
+      if #choices == 2 then
+        open_files("e", choices)
+      else
+        local itemsqf = {}
+        for j = 2, #choices do
+          local parsed_content = parse_vimgrep_line(choices[j])
+          table.insert(itemsqf, { filename = parsed_content.filename, lnum = tonumber(parsed_content.row), col = parsed_content.col, vcol = 1, text = parsed_content.text })
+        end
+        fn.setqflist({}, 'r', { items = itemsqf, title = 'FzfRg' })
+        api.command('botright copen')
+      end
     elseif choices[1] == "ctrl-v" then
-      cmd = "vsp"
+      open_files("vsp", choices)
     elseif choices[1] == "ctrl-t" then
-      cmd = "tabnew"
+      open_files("tabnew", choices)
     elseif choices[1] == "ctrl-s" then
-      cmd = "sp"
+      open_files("sp", choices)
     end
 
-    -- TODO add to quickfix list
-
-    for i=2,#choices do
-      local choice = choices[i]
-      local parsed_content = parse_vimgrep_line(choice)
-      open_file(cmd,
-        parsed_content.filename,
-        parsed_content.row,
-        parsed_content.col)
-    end
   end)()
 end
