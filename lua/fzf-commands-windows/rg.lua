@@ -29,15 +29,19 @@ local has_bat = vim.fn.executable("bat")
 
 return function(opts, pattern)
   local prompt = "Rg> "
-  if not pattern then pattern = "^(?=.)"; prompt = "XX> "  end
+  if pattern then prompt = "Rg (" .. fn.shellescape(pattern) .. ")> " end
+  if not pattern then pattern = "^(?=.)" end
 
+  local preview
+  if fn.executable("bat") == 1 then
+    preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
+  end
+
+  local rgcmd = 'rg --vimgrep --pcre2 --no-heading --field-match-separator=' .. rg_delimiter .. ' ' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
+
   coroutine.wrap(function ()
-    local rgcmd = 'rg --vimgrep --pcre2 --no-heading --field-match-separator=' .. rg_delimiter .. ' ' .. vim.fn.shellescape(pattern)
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--delimiter="' .. rg_delimiter .. '" --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="Rg> "'
-                -- '--preview-window=+{2}-5:hidden:border-left' ..
-                -- ' --highlight-line={2} {1}' ..
-                -- ('--preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--delimiter="' .. rg_delimiter .. '" --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end
