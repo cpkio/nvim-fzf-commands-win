@@ -86,7 +86,7 @@ return function(options)
         table.insert(itemsqf, { bufnr = tonumber(_b), filename = _f, lnum = tonumber(_l), text = _t})
       end
       fn.setqflist({},'r',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
-      api.command('copen')
+      api.command('botright copen')
     end
 
   end)()
