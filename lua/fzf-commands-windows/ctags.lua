@@ -52,7 +52,7 @@ return function(options)
       local tagfile = vim.fn.readfile('tags')
       for _, line in pairs(tagfile) do
         local ln = parse_tag_line(line)
-        if ln.kind == "a" then
+        if ln.kind == "a" or ln.kind == "t" then
           local decorated_line = term.blue .. ln.filename .. term.reset .. rg_delimiter ..
                                 term.green .. ln.linenum .. term.reset .. rg_delimiter ..
                                 tostring(ln.tag)
