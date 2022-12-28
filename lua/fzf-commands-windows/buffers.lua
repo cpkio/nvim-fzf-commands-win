@@ -32,15 +32,15 @@ return function(options)
         if filepath == "" then
           filepath = "[No name]"
         end
-        if modified ~= nil then modified = '⚠' end
-        local item_string = string.format("%-18s", term.red .. ' ' .. tostring(bufnum) .. ' ' .. term.reset) ..
-                            string.format("%-20s", term.green .. ' ' .. tostring(modified) .. ' ' .. term.reset) ..
+        if modified ~= "" then modified = "⚠" else modified = "  " end
+        local item_string = string.format("%14s", term.red .. tostring(bufnum) .. term.reset) ..
+                            string.format("%22s", term.green .. tostring(modified) .. ' ' .. term.reset) ..
                             filepath
         table.insert(items, item_string)
       end
     end
 
-    local head = ' #    ?     file'
+    local head = '#     ? file'
     local tip = term.green .. 'CTRL-Q' .. term.reset .. ' to delete buffer(s). ' ..
                 term.green .. 'CTRL-S' .. term.reset .. ' to open in horizontal split. ' ..
                 term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
