@@ -10,6 +10,21 @@ Environment variables I use by default:
 
 `FZF_PREVIEW_COMMAND=bat --decorations=always --paging=never --italic-text=never --color=always --theme=ansi --wrap=never`
 
+## How to use
+
+I map commands to keyboard shortcuts directly:
+
+```lua
+local map = vim.api.nvim_set_keymap
+local options = { noremap = true, silent = true }
+local common_fzf_opts = '{ border = false, relative = "editor", width=280, noautocmd = true }'
+map('n','<C-d>f', '<CMD>lua require("fzf-commands-windows").files({ fzf = function(contents, options) return require("fzf").fzf(contents, options, ' .. common_fzf_opts ..') end })<CR>', options)
+```
+
+### Ctags settings for `Ctags` command
+
+Use `--excmd=combine` to add line numbers to `tags` file.
+
 ## TODO
 
 * [x] Files
@@ -42,21 +57,23 @@ Environment variables I use by default:
   - [ ] `CTRL-S` to open buffer in a split and go to this line
   - [ ] `CTRL-V` to open buffer in a vertical split and go to this line
   - [ ] `CTRL-T` to open buffer in a new tab (get file name from buffer, open in new tab) go to this line
-  - [x] Multiple selections go to quickfix list on `ENTER` and location list on `ALT-ENTER`
+  - [x] Multiple selections go to quickfix list on `ENTER`
 
-* [ ] Filetypes
+* [x] Filetypes
 
 * [x] Rg
-  - TODO push to quickfix/quickloc list with Enter/M-Enter)
+  - [x] Push to QuickFix list on `Enter` if multiple items selected
 
 * [ ] RgNot (show files with no matches)
 
 * [ ] GFiles
 * [ ] GFiles?
 * [x] GDiff
-
-* [ ] Tags
-* [ ] BTags
+  - [ ] Open chosen commit file in a vertical split with diff on
+  - [ ] Rewrite output: find branch for EVERY commit and show it in list
+* [x] Ctags: Show all tags from a current `tags` file and go to each tags
+      location. Tags format is defined in my config and includes lines numbers
+      to parse
 * [ ] Windows
 * [ ] History
 * [ ] History:
@@ -68,4 +85,4 @@ Environment variables I use by default:
 
 * Helptags
 * Snippets
-* Branches (swich Git branches)
+* Branches (switch Git branches)
