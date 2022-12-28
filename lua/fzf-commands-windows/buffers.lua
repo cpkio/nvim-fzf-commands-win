@@ -25,15 +25,16 @@ return function(options)
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
 
     for line in reglist:gmatch('([^\n]*)\n?') do
-      local bufnum, status, active, filepath, linenum = string.match(line, '^%s*(%d+)%s+(%p?)(%w)%s+"([^"]+)"%s*line%s*(%d+)')
+      local bufnum, status, active, modified, filepath, linenum = string.match(line, '^%s*(%d+)%s+(%p?)(%w)%s*(%+?)%s*"([^"]+)"%s*line%s*(%d+)')
       if bufnum then
         -- reg = string.gsub(reg, [[\(.)]], '%1') -- Unescape
         -- regdata = string.gsub(regdata, [[\(.)]], '%1') -- Unescape
         if filepath == "" then
           filepath = "[No name]"
         end
+        if modified ~= nil then modified = '⚠' end
         local item_string = string.format("%-18s", term.red .. ' ' .. tostring(bufnum) .. ' ' .. term.reset) ..
-                            string.format("%-20s", term.green .. ' ' .. tostring(status) .. ' ' .. term.reset) ..
+                            string.format("%-20s", term.green .. ' ' .. tostring(modified) .. ' ' .. term.reset) ..
                             filepath
         table.insert(items, item_string)
       end
