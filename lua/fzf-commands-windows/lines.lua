@@ -7,7 +7,6 @@ local rg_delimiter=' ' -- 0x202F
 
 return function(options)
 
-  -- port from fzf.vim
   local function locate(bufnum)
     for tab = 1, vim.fn.tabpagenr('$') do
       local buffers = vim.fn.tabpagebuflist(tab)
@@ -25,20 +24,15 @@ return function(options)
     local opts = (term.fzf_colors .. '--reverse --header-lines=1 --multi --ansi --prompt="Lines> "')
     local items = {}
 
-    -- Loading buffers list
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
 
     for line in reglist:gmatch('([^\n]*)\n?') do
-      -- Parsing active buffers list
       local bufnum, status, _, filepath, _ = string.match(line, '^%s*(%d+)%s+(%p?)(%w)%s+"([^"]+)"%s*line%s*(%d+)')
       if bufnum then
-        -- reg = string.gsub(reg, [[\(.)]], '%1') -- Unescape
-        -- regdata = string.gsub(regdata, [[\(.)]], '%1') -- Unescape
         if filepath == "" then
           filepath = "[No name]"
         end
 
-        -- Get buffer lines for each found buffer
         local buflines = api.buf_get_lines(tonumber(bufnum),0,-1,0)
 
         for linenum, line in pairs(buflines) do

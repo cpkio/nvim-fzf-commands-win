@@ -9,7 +9,6 @@ local rg_delimiter=' '
 local function open_file(window_cmd, filename, row, col)
   vim.cmd(window_cmd .. " ".. vim.fn.fnameescape(filename))
   api.win_set_cursor(0, {row, col - 1})
-  -- center the window
   vim.cmd "normal! zz"
 end
 

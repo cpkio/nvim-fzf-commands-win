@@ -1,6 +1,3 @@
--- For now files list from `fd` is pushed directly to output stream. Will not
--- mangle it for now to add hints & tips strings.
-
 local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
@@ -10,15 +7,11 @@ return function(opts)
   opts = utils.normalize_opts(opts)
   local command
   if fn.executable("fd") == 1 then
-    command = "fd --color never -t f -L"
-  else
-    command = "dir /B /O-D"
+    command = "fd --color never -tf -L --strip-cwd-prefix"
   end
 
   local preview
   if fn.executable("bat") == 1 then
-    -- Adding {} to preview command is needed for me because other preview
-    -- placeholders can be other ones
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' {}'
   else
     preview = 'type "$0"'
@@ -41,8 +34,6 @@ return function(opts)
       vimcmd = "e"
     end
 
-    -- воспользоваться встроенной функцией list_slice
-    -- не забывать и о list_extend, vim.split()
     for i=2, #choices do
       vim.cmd(vimcmd .. " " .. fn.fnameescape(choices[i]))
     end

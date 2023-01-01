@@ -4,7 +4,6 @@ local fn, api = utils.helpers()
 
 return function(options)
 
-  -- port from fzf.vim
   local function locate(bufnum)
     for tab = 1, vim.fn.tabpagenr('$') do
       local buffers = vim.fn.tabpagebuflist(tab)
@@ -27,20 +26,18 @@ return function(options)
     for line in reglist:gmatch('([^\n]*)\n?') do
       local bufnum, status, active, modified, filepath, linenum = string.match(line, '^%s*(%d+)%s+(%p?)(%w)%s*(%+?)%s*"([^"]+)"%s*line%s*(%d+)')
       if bufnum then
-        -- reg = string.gsub(reg, [[\(.)]], '%1') -- Unescape
-        -- regdata = string.gsub(regdata, [[\(.)]], '%1') -- Unescape
         if filepath == "" then
           filepath = "[No name]"
         end
         if modified ~= "" then modified = "⚠" else modified = "  " end
-        local item_string = string.format("%14s", term.red .. tostring(bufnum) .. term.reset) ..
-                            string.format("%22s", term.green .. tostring(modified) .. ' ' .. term.reset) ..
-                            filepath
+        local item_string = string.format("%-20s", term.green .. tostring(bufnum) .. term.reset) ..
+                            string.format("%-20s", term.brightred .. tostring(modified) .. ' ' .. term.reset) ..
+                            term.blue .. filepath .. term.reset
         table.insert(items, item_string)
       end
     end
 
-    local head = '#     ? file'
+    local head = '#      ?    file'
     local tip = term.green .. 'CTRL-Q' .. term.reset .. ' to delete buffer(s). ' ..
                 term.green .. 'CTRL-S' .. term.reset .. ' to open in horizontal split. ' ..
                 term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
@@ -54,15 +51,8 @@ return function(options)
       return
     end
 
-    -- TODO Эта функция не сработает, если нужный нам буфер находится в фоне
-    -- Нужно вызывать функцию nvim_win_set_buf и передавать ей window handle,
-    -- который похоже начинается от 1000, и номер буфера
-    -- fn.bufwinid возвращает окно только если буфер в этом окне показывается!
-    -- Вообще получается, что скрытый буфер ни с каким окном не связан,
-    -- а значит его можно показывать прямо на месте? Опять-таки, скрытые
-    -- буфера можно открывать в новых вкладках, новых сплитах
-    local cmd
-    if lines[1] == "" then -- you can go only to one buffer on keypress
+   local cmd
+    if lines[1] == "" then
       local bufnum, _ = tonumber(string.match(lines[2], '^%s*(%d+)'))
       local bufinfo = fn.getbufinfo(bufnum)[1]
       if bufinfo.hidden == 1 then

@@ -7,8 +7,6 @@ return function(options)
 
   local preview
   if fn.executable("bat") == 1 then
-    -- Adding {} to preview command is needed for me because other preview
-    -- placeholders can be other ones
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' {3}'
   else
     preview = 'type "$0"'
@@ -77,8 +75,8 @@ return function(options)
     if lines[1] == "ctrl-q" then
       for i = 2, #lines do
         local m, _ = string.match(lines[i], '^%s*(%S*)')
-        if m == '"' then m = [[\"]] end -- if we meet double quote in output stream
-        if m == "'" then m = [[\']] end -- if we meet single quote in output stream
+        if m == '"' then m = [[\"]] end
+        if m == "'" then m = [[\']] end
         local cmd = "delmark " .. m
         api.command(cmd)
       end
