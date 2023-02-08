@@ -75,9 +75,8 @@ Use `--excmd=combine` to add line numbers to `tags` file.
       location. Tags format is defined in my config and includes lines numbers
       to parse
 * [ ] Windows
-* [ ] History
-* [ ] History:
-* [ ] History/
+* [x] Commands History
+* [x] Search History
 * [ ] Commits
 * [ ] BCommits
 
