@@ -38,8 +38,8 @@ return function(options)
           local linenum, line = string.match(lines[j], '^%s*(%d+)%s*(%S.+)')
           table.insert(itemsqf, { bufnr = bufnum, lnum = tonumber(linenum), text = line })
         end
-        fn.setqflist({},'r',{ id = 'FzfBLines', items = itemsqf, title = 'FzfBLines'})
-        api.command('copen')
+        fn.setqflist({},' ',{ id = 'FzfBLines', items = itemsqf, title = 'FzfBLines'})
+        api.command('botright copen')
       end
     end
     if lines[1] == "ctrl-l" then
@@ -53,8 +53,8 @@ return function(options)
           local linenum, line = string.match(lines[j], '^%s*(%d+)%s*(%S.+)')
           table.insert(itemsqf, { bufnr = bufnum, lnum = tonumber(linenum), text = line })
         end
-        fn.setloclist(fn.win_getid(),{},'r',{ id = 'FzfBLines', items = itemsqf, title = 'FzfBLines'})
-        api.command('lopen')
+        fn.setloclist(fn.win_getid(),{},' ',{ id = 'FzfBLines', items = itemsqf, title = 'FzfBLines'})
+        api.command('botright lopen')
       end
     end
 
