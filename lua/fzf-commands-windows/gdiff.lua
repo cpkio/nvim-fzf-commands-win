@@ -30,7 +30,7 @@ return function(opts)
   coroutine.wrap(function ()
     local fname = fn.fnamemodify(api.buf_get_name(0), ":t") -- барахлит функция на многооконных раскладках, но ладно
     local gitsrc = "git log --all --pretty=format:%H" .. d_delimiter .."%s" .. d_delimiter .. "%d -- *".. fname
-    local fzfpreview = "git diff {1} -- *" .. fname .. " | delta --wrap-max-lines=unlimited " ..
+    local fzfpreview = "git diff -R {1} -- *" .. fname .. " | delta --wrap-max-lines=unlimited " ..
     '--file-style=white                               ' ..
 
     '--minus-style=brightred                          ' ..
