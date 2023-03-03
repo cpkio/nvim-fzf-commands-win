@@ -21,7 +21,7 @@ local common_fzf_opts = '{ border = false, relative = "editor", width=280, noaut
 map('n','<C-d>f', '<CMD>lua require("fzf-commands-windows").files({ fzf = function(contents, options) return require("fzf").fzf(contents, options, ' .. common_fzf_opts ..') end })<CR>', options)
 ```
 
-### Ctags settings for `Ctags` command
+### Universal Ctags settings for `Ctags` command
 
 Use `--excmd=combine` to add line numbers to `tags` file.
 
@@ -69,8 +69,7 @@ Use `--excmd=combine` to add line numbers to `tags` file.
 * [ ] GFiles
 * [ ] GFiles?
 * [x] GDiff
-  - [ ] Open chosen commit file in a vertical split with diff on
-  - [ ] Rewrite output: find branch for EVERY commit and show it in list
+  - [x] Open chosen commit file in a vertical split with diff on (if you want something from it to your current file)
 * [x] Ctags: Show all tags from a current `tags` file and go to each tags
       location. Tags format is defined in my config and includes lines numbers
       to parse
