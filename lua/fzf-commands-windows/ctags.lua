@@ -1,5 +1,6 @@
 local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
+local utf = require "lua-utf8" -- sadly this is needed for non-ascii filenames
 
 local fn, api = utils.helpers()
 
@@ -8,7 +9,7 @@ local rg_delimiter=' '
 local has_bat = vim.fn.executable("bat")
 
 local function parse_tag_line(line)
-  local parsed_line = { string.match(line, [[([^%c]+)%c([^%c]+)%c(%d*);/^[^%c]+%c(%l)]]) }
+  local parsed_line = { utf.match(line, [[([^%c]+)%c([^%c]+)%c(%d*);/^[^%c]+%c(%l)]]) }
   local tag_text = parsed_line[1]
   local filename = parsed_line[2]
   local linenum = tonumber(parsed_line[3])
@@ -22,7 +23,7 @@ local function parse_tag_line(line)
 end
 
 local function parse_fzf_line(line)
-  local parsed_line = { string.match(line, '([^'..rg_delimiter..']+)'..rg_delimiter..'(%d+)') }
+  local parsed_line = { utf.match(line, '^([^'..rg_delimiter..']+)'..rg_delimiter..'(%d+)') }
   local filename = parsed_line[1]
   local linenum = parsed_line[2]
   return {
@@ -31,6 +32,16 @@ local function parse_fzf_line(line)
   }
 end
 
+local function gettags()
+  local tagopt = vim.fn.split(vim.api.nvim_get_option('tags'), ',')
+
+  for _, tagfile in pairs(tagopt) do
+    if vim.fn.filereadable(tagfile) > 0 then
+      return vim.fn.readfile(tagfile)
+    end
+  end
+  return nil
+end
 
 return function(options)
 
@@ -46,11 +57,8 @@ return function(options)
 
     local items = {}
 
-    local readable = vim.fn.filereadable('tags')
-
-    if readable == 1 then
-      local tagfile = vim.fn.readfile('tags')
-      for _, line in pairs(tagfile) do
+    if gettags() then
+      for _, line in pairs(gettags()) do
         local ln = parse_tag_line(line)
         if ln.kind == "a" or ln.kind == "t" then
           local decorated_line = term.blue .. ln.filename .. term.reset .. rg_delimiter ..
@@ -60,7 +68,7 @@ return function(options)
         end
       end
     else
-      vim.cmd('echomsg "Tags file not found"')
+      vim.api.nvim_err_writeln('Tags file not found')
       return
     end
 
