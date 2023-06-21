@@ -18,5 +18,6 @@ M.filetypes = run_module("fzf-commands-windows.filetypes")
 M.ctags = run_module("fzf-commands-windows.ctags")
 M.commands_history = run_module("fzf-commands-windows.commands_history")
 M.search_history = run_module("fzf-commands-windows.search_history")
+M.directories = run_module("fzf-commands-windows.directories")
 
 return M
