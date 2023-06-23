@@ -5,12 +5,9 @@ local fn, api = utils.helpers()
 return function(opts)
 
   opts = utils.normalize_opts(opts)
-  local cdir = vim.fn.getcwd()
-  local rootdir = vim.fn.fnamemodify(cdir, ":h")
   local command
   if fn.executable("fd") == 1 then
-    -- command = 'fd --color=never --type=directory -u -d 5 . "' .. vim.fn.fnameescape(rootdir) .. '"'
-    command = 'fd --color=never --type=directory -d 5 . ".."'
+    command = 'fd --color=never --type=directory -d 8 --base-directory="..\\..\\..\\.."'
   end
 
   coroutine.wrap(function ()
@@ -28,7 +25,7 @@ return function(opts)
       vimcmd = "tcd"
     end
 
-    vim.cmd(vimcmd .. " " .. fn.fnameescape(choice[2]))
+    vim.cmd(vimcmd .. " " .. fn.fnameescape('..\\..\\..\\..\\' .. choice[2]))
 
   end)()
 end
