@@ -2,10 +2,27 @@ local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
+local ui_w = vim.api.nvim_list_uis()[1].width
+local ui_h = vim.api.nvim_list_uis()[1].height
+local margin_horz = 20
+local margin_vert = 20
+
+local winopts = {
+  border = "single",
+  title = "Scratch buffer",
+  title_pos = "center",
+  width = ui_w - 2*margin_horz,
+  height = ui_h - 2*margin_vert,
+  relative = "editor",
+  row = margin_vert,
+  col = margin_horz,
+}
+
+
 return function(options)
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = (term.fzf_colors .. '--reverse --header-lines=1 --multi --expect=ctrl-l --ansi --prompt="BLines> "')
+    local opts = (term.fzf_colors .. '--reverse --header-lines=1 --multi --expect=ctrl-l,ctrl-p --ansi --prompt="BLines> "')
     local items = {}
 
     local buflines = api.buf_get_lines(0,0,-1,0)
@@ -18,7 +35,8 @@ return function(options)
     end
 
     local tip = term.green .. 'ENTER' .. term.reset .. ' to push to Quickfix list. ' ..
-                term.green .. 'CTRL-L' .. term.reset .. ' to push to Locations list. '
+                term.green .. 'CTRL-L' .. term.reset .. ' to push to Locations list. ' ..
+                term.green .. 'CTRL-P' .. term.reset .. ' to paste to new file.'
 
     table.insert(items, 1, tip)
 
@@ -42,6 +60,7 @@ return function(options)
         api.command('botright copen')
       end
     end
+
     if lines[1] == "ctrl-l" then
       if #lines == 2 then
         local linenum, _ = string.match(lines[2], '^%s*(%d+)')
@@ -56,6 +75,22 @@ return function(options)
         fn.setloclist(fn.win_getid(),{},' ',{ id = 'FzfBLines', items = itemsqf, title = 'FzfBLines'})
         api.command('botright lopen')
       end
+    end
+
+    if lines[1] == "ctrl-p" then
+      local tempbuffer = vim.api.nvim_create_buf(true, true)
+      if #lines == 2 then
+        local _, line = string.match(lines[2], '^%s*(%d+)%s*(%S.+)')
+        vim.api.nvim_buf_set_lines(tempbuffer, 0, -1, true, { line })
+      else
+        local buflines = {}
+        for j = 2, #lines do
+          local _, line = string.match(lines[j], '^%s*(%d+)%s*(%S.+)')
+          table.insert(buflines, line)
+        end
+        vim.api.nvim_buf_set_lines(tempbuffer, 0, -1, true, buflines)
+      end
+      vim.api.nvim_open_win(tempbuffer, true, winopts)
     end
 
   end)()
