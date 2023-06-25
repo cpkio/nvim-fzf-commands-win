@@ -2,6 +2,7 @@ local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
+local rg_delimiter=' '
 local ui_w = vim.api.nvim_list_uis()[1].width
 local ui_h = vim.api.nvim_list_uis()[1].height
 local margin_horz = 20
@@ -29,7 +30,7 @@ return function(options)
 
     for i, line in pairs(buflines) do
       if #line > 0 then
-        line = string.format("%-18s", term.red .. ' ' .. tostring(i) .. ' ' .. term.reset) .. line
+        line = string.format("%-18s", term.red .. ' ' .. tostring(i) .. ' ' .. term.reset) .. rg_delimiter .. line
         table.insert(items, line)
       end
     end
@@ -80,12 +81,12 @@ return function(options)
     if lines[1] == "ctrl-p" then
       local tempbuffer = vim.api.nvim_create_buf(true, true)
       if #lines == 2 then
-        local _, line = string.match(lines[2], '^%s*(%d+)%s*(%S.+)')
+        local line = string.match(lines[2], '^.+'..rg_delimiter..'(.+)')
         vim.api.nvim_buf_set_lines(tempbuffer, 0, -1, true, { line })
       else
         local buflines = {}
         for j = 2, #lines do
-          local _, line = string.match(lines[j], '^%s*(%d+)%s*(%S.+)')
+          local line = string.match(lines[j], '^.+'..rg_delimiter..'(.+)')
           table.insert(buflines, line)
         end
         vim.api.nvim_buf_set_lines(tempbuffer, 0, -1, true, buflines)
