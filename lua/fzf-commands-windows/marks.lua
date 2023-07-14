@@ -50,12 +50,14 @@ return function(options)
     if lines[1] == "" then
         local mrk, _ = string.match(lines[2], '^%s*(%S*)')
         local cmd = "normal! `" .. mrk .. "zz"
+        api.command(cmd)
     end
     if lines[1] == "ctrl-t" then
       for i = 2, #lines do
         local mrk, _ = string.match(lines[i], '^%s*(%S*)')
         local cmd = "normal! `" .. mrk .. "zz"
         cmd = "tab split | " .. cmd
+        api.command(cmd)
       end
     end
     if lines[1] == "ctrl-v" then
@@ -63,6 +65,7 @@ return function(options)
         local mrk, _ = string.match(lines[i], '^%s*(%S*)')
         local cmd = "normal! `" .. mrk .. "zz"
         cmd = "vertical split | " .. cmd
+        api.command(cmd)
       end
     end
     if lines[1] == "ctrl-s" then
@@ -70,6 +73,7 @@ return function(options)
         local mrk, _ = string.match(lines[i], '^%s*(%S*)')
         local cmd = "normal! `" .. mrk .. "zz"
         cmd = "split | " .. cmd
+        api.command(cmd)
       end
     end
     if lines[1] == "ctrl-q" then
