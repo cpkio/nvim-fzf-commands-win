@@ -2,6 +2,8 @@ local vim, fn, api = vim, vim.fn, vim.api
 
 local strings = require("plenary.strings")
 
+local delim = ' '
+
 local kind_to_color = {
   ["Class"] = "blue",
   ["Constant"] = "cyan",
@@ -17,12 +19,10 @@ local kind_to_color = {
 
 local M = {}
 
--- binary paths {{{
-local __file = debug.getinfo(1, "S").source:match("@(.*)$")
-assert(__file ~= nil)
-local bin_dir = fn.fnamemodify(__file, ":p:h:h") .. "/bin"
-local bin = { preview = (bin_dir .. "/preview.sh") }
--- }}}
+-- local __file = debug.getinfo(1, "S").source:match("@(.*)$")
+-- assert(__file ~= nil)
+-- local bin_dir = fn.fnamemodify(__file, ":p:h:h") .. "/bin"
+-- local bin = { preview = (bin_dir .. "/preview.sh") }
 
 -- utility functions {{{
 local function partial(func, arg)
@@ -110,7 +110,7 @@ local function check_capabilities(provider, client_id)
   local supported_client = false
   for _, client in pairs(clients) do
     supported_client = client.server_capabilities[provider]
-    if supported_client then 
+    if supported_client then
       return true
     else
       if #clients == 0 then
@@ -152,12 +152,11 @@ local function joinloc_pretty(loc, include_filename)
     .. " "
     .. colored_kind(loc["kind"])
     .. string.rep(" ", 50)
-    .. "\x01 "
+    .. delim
     .. fnamemodify(loc["filename"], include_filename)
     .. loc["lnum"]
     .. ":"
     .. loc["col"]
-    .. ":"
 end
 
 local function extloc_raw(line, include_filename)
@@ -181,7 +180,7 @@ local function extloc_raw(line, include_filename)
 end
 
 local function extloc_pretty(line, include_filename)
-  local split = vim.split(line, "\x01 ")
+  local split = vim.split(line, delim)
   local text = split[1]
   local file = split[2]
 
@@ -203,6 +202,8 @@ local function extloc_pretty(line, include_filename)
   }
 end
 
+-- Эта функция вызывается только в M.diagnostic, точнее я вызываю там
+-- следующую, а эта не задействована, но может быть полезна
 local function joindiag_raw(e, include_filename)
   return fnamemodify(e["filename"], include_filename)
     .. e["lnum"]
@@ -214,16 +215,16 @@ local function joindiag_raw(e, include_filename)
     .. e["text"]:gsub("%s", " ")
 end
 
+-- Эта функция вызывается только в M.diagnostic
 local function joindiag_pretty(e, include_filename)
   return e["type"]
     .. ": "
     .. e["text"]:gsub("%s", " ")
-    .. "\x01 "
+    .. delim
     .. fnamemodify(e["filename"], include_filename)
     .. e["lnum"]
     .. ":"
     .. e["col"]
-    .. ":"
 end
 
 local function lines_from_locations(locations, include_filename)
@@ -309,8 +310,10 @@ local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 
 -- FZF functions {{{
 
+-- Обработчик выбранной строки или строк
 local function common_sink(infile, lines)
 
+  -- Создаём массив строк для QuickFixList из lines
   local locations = locations_from_lines(lines, not infile)
   if #lines > 1 then
     vim.fn.setqflist({}, ' ', {
@@ -319,16 +322,17 @@ local function common_sink(infile, lines)
       })
     api.nvim_command("copen")
     api.nvim_command("wincmd p")
-
     return
   end
 
+  -- Если выбран только один вариант, переходим к нему
   for _, loc in ipairs(locations) do
     fn.cursor(loc["lnum"], loc["col"])
     api.nvim_command("normal! zvzz")
   end
 end
 
+-- Эта функция не используется!
 local function fzf_ui_select(items, opts, on_choice)
   local prompt = opts.prompt or "Select one of:"
   local format_item = opts.format_item or tostring
@@ -380,7 +384,11 @@ local function fzf_locations(header, prompt, source, infile)
     table.insert(options, "--header")
     table.insert(options, header)
   end
-  print(source)
+  print(vim.inspect(
+    source
+  ))
+
+
 
   -- fzf_run(fzf_wrap("fzf_lsp", {
   --   source = source,
