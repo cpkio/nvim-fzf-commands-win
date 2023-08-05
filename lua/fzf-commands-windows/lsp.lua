@@ -1,4 +1,4 @@
-local vim, fn, api, g = vim, vim.fn, vim.api, vim.g
+local vim, fn, api = vim, vim.fn, vim.api
 
 local strings = require("plenary.strings")
 
@@ -35,12 +35,12 @@ local function perror(err)
   vim.notify("ERROR: " .. tostring(err), vim.log.levels.WARN)
 end
 
-local function mk_handler(fn)
+local function mk_handler(fun)
   return function(...)
     local config_or_client_id = select(4, ...)
     local is_new = type(config_or_client_id) ~= 'number'
     if is_new then
-      fn(...)
+      fun(...)
     else
       local err = select(1, ...)
       local method = select(2, ...)
@@ -48,7 +48,7 @@ local function mk_handler(fn)
       local client_id = select(4, ...)
       local bufnr = select(5, ...)
       local config = select(6, ...)
-      fn(err, result, { method = method, client_id = client_id, bufnr = bufnr }, config)
+      fun(err, result, { method = method, client_id = client_id, bufnr = bufnr }, config)
     end
   end
 end
@@ -93,7 +93,7 @@ local function call_sync(method, params, opts, handler)
   opts = opts or {}
   local bufnr = vim.api.nvim_get_current_buf()
   local results_lsp, err = vim.lsp.buf_request_sync(
-    bufnr, method, params, opts.timeout or g.fzf_lsp_timeout
+    bufnr, method, params, opts.timeout
   )
 
   local ctx = {
@@ -110,19 +110,16 @@ local function check_capabilities(provider, client_id)
   local supported_client = false
   for _, client in pairs(clients) do
     supported_client = client.server_capabilities[provider]
-    if supported_client then goto continue end
-  end
-
-  ::continue::
-  if supported_client then
-    return true
-  else
-    if #clients == 0 then
-      vim.notify("LSP: no client attached", vim.log.levels.INFO)
+    if supported_client then 
+      return true
     else
-      vim.notify("LSP: server does not support " .. provider, vim.log.levels.INFO)
+      if #clients == 0 then
+        vim.notify("LSP: no client attached", vim.log.levels.INFO)
+      else
+        vim.notify("LSP: server does not support " .. provider, vim.log.levels.INFO)
+      end
+      return false
     end
-    return false
   end
 end
 
@@ -149,7 +146,7 @@ local function joinloc_raw(loc, include_filename)
 end
 
 local function joinloc_pretty(loc, include_filename)
-  local width = g.fzf_lsp_width
+  local width = 48
   local text = vim.trim(loc["text"]:gsub("%b[]", ""))
   return strings.align_str(strings.truncate(text, width), width)
     .. " "
@@ -230,7 +227,7 @@ local function joindiag_pretty(e, include_filename)
 end
 
 local function lines_from_locations(locations, include_filename)
-  local joinfn = g.fzf_lsp_pretty and joinloc_pretty or joinloc_raw
+  local joinfn = joinloc_pretty or joinloc_raw
 
   local lines = {}
   for _, loc in ipairs(locations) do
@@ -241,7 +238,7 @@ local function lines_from_locations(locations, include_filename)
 end
 
 local function locations_from_lines(lines, include_filename)
-  local extractfn = g.fzf_lsp_pretty and extloc_pretty or extloc_raw
+  local extractfn = extloc_pretty or extloc_raw
 
   local locations = {}
   for _, l in ipairs(lines) do
@@ -311,49 +308,11 @@ local call_hierarchy_handler_to = partial(call_hierarchy_handler, "to")
 -- }}}
 
 -- FZF functions {{{
-local function fzf_wrap(name, opts, bang)
-  name = name or ""
-  opts = opts or {}
-  bang = bang or 0
-
-  if g.fzf_lsp_layout then
-    opts = vim.tbl_extend('keep', opts, g.fzf_lsp_layout)
-  end
-
-  if g.fzf_lsp_colors then
-    vim.list_extend(opts.options, {"--color", g.fzf_lsp_colors})
-  end
-
-  local sink_fn = opts["sink*"] or opts["sink"]
-  if sink_fn ~= nil then
-    opts["sink"] = nil; opts["sink*"] = 0
-  else
-    -- if no sink function is given i automatically put the actions
-    if g.fzf_lsp_action and not vim.tbl_isempty(g.fzf_lsp_action) then
-      vim.list_extend(
-        opts.options, {"--expect", table.concat(vim.tbl_keys(g.fzf_lsp_action), ",")}
-      )
-    end
-  end
-  local wrapped = fn["fzf#wrap"](name, opts, bang)
-  wrapped["sink*"] = sink_fn
-
-  return wrapped
-end
-
-local function fzf_run(...)
-  return fn["fzf#run"](...)
-end
 
 local function common_sink(infile, lines)
-  local action
-  if g.fzf_lsp_action and not vim.tbl_isempty(g.fzf_lsp_action) then
-    local key = table.remove(lines, 1)
-    action = g.fzf_lsp_action[key]
-  end
 
   local locations = locations_from_lines(lines, not infile)
-  if action == nil and #lines > 1 then
+  if #lines > 1 then
     vim.fn.setqflist({}, ' ', {
         title = 'Language Server';
         items = locations;
@@ -364,22 +323,7 @@ local function common_sink(infile, lines)
     return
   end
 
-  action = action or "e"
-
   for _, loc in ipairs(locations) do
-    local edit_infile = (
-      (infile or fn.expand("%:~:.") == loc["filename"]) and
-      (action == "e" or action == "edit")
-    )
-    -- if i'm editing the same file i'm in, i can just move the cursor
-    if not edit_infile then
-      -- otherwise i can start executing the actions
-      local err = api.nvim_command(action .. " " .. loc["filename"])
-      if err ~= nil then
-        api.nvim_command("echoerr " .. err)
-      end
-    end
-
     fn.cursor(loc["lnum"], loc["col"])
     api.nvim_command("normal! zvzz")
   end
@@ -412,35 +356,21 @@ local function fzf_ui_select(items, opts, on_choice)
     end
   end
 
-  fzf_run(fzf_wrap("fzf_lsp", {
-      source = source,
-      sink = sink_fn,
-      options = {
-        "--prompt", prompt .. " ",
-        "--ansi",
-      }
-  }, 0))
+  -- fzf_run(fzf_wrap("fzf_lsp", {
+  --     source = source,
+  --     sink = sink_fn,
+  --     options = {
+  --       "--prompt", prompt .. " ",
+  --       "--ansi",
+  --     }
+  -- }, 0))
 end
 
-local function fzf_locations(bang, header, prompt, source, infile)
-  local preview_cmd
-  if g.fzf_lsp_pretty then
-    preview_cmd = (infile and
-      (bin.preview .. " " .. fn.expand("%") .. ":{-1}") or
-      (bin.preview .. " {-1}")
-    )
-  else
-    preview_cmd = (infile and
-      (bin.preview .. " " .. fn.expand("%") .. ":{}") or
-      (bin.preview .. " {}")
-    )
-  end
+local function fzf_locations(header, prompt, source, infile)
 
-  local options = { 
+  local options = {
     "--ansi",
     "--multi",
-    "--bind",
-    "ctrl-a:select-all,ctrl-d:deselect-all",
   }
   if string.len(prompt) > 0 then
     table.insert(options, "--prompt")
@@ -450,41 +380,16 @@ local function fzf_locations(bang, header, prompt, source, infile)
     table.insert(options, "--header")
     table.insert(options, header)
   end
+  print(source)
 
-  if g.fzf_lsp_pretty then
-    vim.list_extend(options, {"--delimiter", "\x01 ", "--nth", "1"})
-  end
-
-  if g.fzf_lsp_action and not vim.tbl_isempty(g.fzf_lsp_action) then
-    vim.list_extend(
-      options, {"--expect", table.concat(vim.tbl_keys(g.fzf_lsp_action), ",")}
-    )
-  end
-
-  if g.fzf_lsp_preview_window then
-    if #g.fzf_lsp_preview_window == 0 then
-      g.fzf_lsp_preview_window = {"hidden"}
-    end
-
-    vim.list_extend(options, {"--preview-window", g.fzf_lsp_preview_window[1]})
-    if #g.fzf_lsp_preview_window > 1 then
-      local preview_bindings = {}
-      for i=2, #g.fzf_lsp_preview_window, 1 do
-        table.insert(preview_bindings, g.fzf_lsp_preview_window[i] .. ":toggle-preview")
-      end
-      vim.list_extend(options, {"--bind", table.concat(preview_bindings, ",")})
-    end
-  end
-
-  vim.list_extend(options, {"--preview", preview_cmd})
-  fzf_run(fzf_wrap("fzf_lsp", {
-    source = source,
-    sink = partial(common_sink, infile),
-    options = options,
-  }, bang))
+  -- fzf_run(fzf_wrap("fzf_lsp", {
+  --   source = source,
+  --   sink = partial(common_sink, infile),
+  --   options = options,
+  -- }, bang))
 end
 
-local function fzf_code_actions(bang, header, prompt, actions)
+local function fzf_code_actions(header, prompt, actions)
   local lines = {}
   for i, a in ipairs(actions) do
     lines[i] = a["idx"] .. ". " .. a["title"]
@@ -526,16 +431,16 @@ local function fzf_code_actions(bang, header, prompt, actions)
     table.insert(opts, "--header")
     table.insert(opts, header)
   end
-  fzf_run(fzf_wrap("fzf_lsp", {
-      source = lines,
-      sink = sink_fn,
-      options = opts
-  }, bang))
+  -- fzf_run(fzf_wrap("fzf_lsp", {
+  --     source = lines,
+  --     sink = sink_fn,
+  --     options = opts
+  -- }, bang))
 end
 -- }}}
 
 -- LSP reponse handlers {{{
-local function code_action_handler(bang, err, result, _, _)
+local function code_action_handler(err, result, _, _)
   if err ~= nil then
     perror(err)
     return
@@ -550,46 +455,46 @@ local function code_action_handler(bang, err, result, _, _)
     a.idx = i
   end
 
-  fzf_code_actions(bang, "", "Code Actions", result)
+  fzf_code_actions("", "Code Actions", result)
 end
 
-local function definition_handler(bang, err, result, ctx, config)
+local function definition_handler(err, result, ctx, config)
   local results = location_handler(
     err, result, ctx, config, "Definition not found"
   )
   if results and not vim.tbl_isempty(results) then
-    fzf_locations(bang, "", "Definitions", results, false)
+    fzf_locations("", "Definitions", results, false)
   end
 end
 
-local function declaration_handler(bang, err, result, ctx, config)
+local function declaration_handler(err, result, ctx, config)
   local results = location_handler(
     err, result, ctx, config, "Declaration not found"
   )
   if results and not vim.tbl_isempty(results) then
-    fzf_locations(bang, "", "Declarations", results, false)
+    fzf_locations("", "Declarations", results, false)
   end
 end
 
-local function type_definition_handler(bang, err, result, ctx, config)
+local function type_definition_handler(err, result, ctx, config)
   local results = location_handler(
     err, result, ctx, config, "Type Definition not found"
   )
   if results and not vim.tbl_isempty(results) then
-    fzf_locations(bang, "", "Type Definitions", results, false)
+    fzf_locations("", "Type Definitions", results, false)
   end
 end
 
-local function implementation_handler(bang, err, result, ctx, config)
+local function implementation_handler(err, result, ctx, config)
   local results = location_handler(
     err, result, ctx, config, "Implementation not found"
   )
   if results and not vim.tbl_isempty(results) then
-    fzf_locations(bang, "", "Implementations", results, false)
+    fzf_locations("", "Implementations", results, false)
   end
 end
 
-local function references_handler(bang, err, result, ctx, _)
+local function references_handler(err, result, ctx, _)
   if err ~= nil then
     perror(err)
     return
@@ -605,10 +510,10 @@ local function references_handler(bang, err, result, ctx, _)
   local lines = lines_from_locations(
     vim.lsp.util.locations_to_items(result, client.offset_encoding), true
   )
-  fzf_locations(bang, "", "References", lines, false)
+  fzf_locations("", "References", lines, false)
 end
 
-local function document_symbol_handler(bang, err, result, ctx, _)
+local function document_symbol_handler(err, result, ctx, _)
   if err ~= nil then
     perror(err)
     return
@@ -622,10 +527,10 @@ local function document_symbol_handler(bang, err, result, ctx, _)
   local lines = lines_from_locations(
     vim.lsp.util.symbols_to_items(result, ctx.bufnr), false
   )
-  fzf_locations(bang, "", "Document Symbols", lines, true)
+  fzf_locations("", "Document Symbols", lines, true)
 end
 
-local function workspace_symbol_handler(bang, err, result, ctx, _)
+local function workspace_symbol_handler(err, result, ctx, _)
   if err ~= nil then
     perror(err)
     return
@@ -639,74 +544,74 @@ local function workspace_symbol_handler(bang, err, result, ctx, _)
   local lines = lines_from_locations(
     vim.lsp.util.symbols_to_items(result, ctx.bufnr), true
   )
-  fzf_locations(bang, "", "Workspace Symbols", lines, false)
+  fzf_locations("", "Workspace Symbols", lines, false)
 end
 
-local function incoming_calls_handler(bang, err, result, ctx, config)
+local function incoming_calls_handler(err, result, ctx, config)
   local results = call_hierarchy_handler_from(
     err, result, ctx, config, "Incoming calls not found"
   )
   if results and not vim.tbl_isempty(results) then
-    fzf_locations(bang, "", "Incoming Calls", results, false)
+    fzf_locations("", "Incoming Calls", results, false)
   end
 end
 
-local function outgoing_calls_handler(bang, err, result, ctx, config)
+local function outgoing_calls_handler(err, result, ctx, config)
   local results = call_hierarchy_handler_to(
     err, result, ctx, config, "Outgoing calls not found"
   )
   if results and not vim.tbl_isempty(results) then
-    fzf_locations(bang, "", "Outgoing Calls", results, false)
+    fzf_locations("", "Outgoing Calls", results, false)
   end
 end
 -- }}}
 
 -- COMMANDS {{{
-function M.definition(bang, opts)
+function M.definition(opts)
   if not check_capabilities("definitionProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "textDocument/definition", params, opts, partial(definition_handler, bang)
+    "textDocument/definition", params, opts, partial(definition_handler)
   )
 end
 
-function M.declaration(bang, opts)
+function M.declaration(opts)
   if not check_capabilities("declarationProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "textDocument/declaration", params, opts, partial(declaration_handler, bang)
+    "textDocument/declaration", params, opts, partial(declaration_handler)
   )
 end
 
-function M.type_definition(bang, opts)
+function M.type_definition(opts)
   if not check_capabilities("typeDefinitionProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "textDocument/typeDefinition", params, opts, partial(type_definition_handler, bang)
+    "textDocument/typeDefinition", params, opts, partial(type_definition_handler)
   )
 end
 
-function M.implementation(bang, opts)
+function M.implementation(opts)
   if not check_capabilities("implementationProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "textDocument/implementation", params, opts, partial(implementation_handler, bang)
+    "textDocument/implementation", params, opts, partial(implementation_handler)
   )
 end
 
-function M.references(bang, opts)
+function M.references(opts)
   if not check_capabilities("referencesProvider") then
     return
   end
@@ -714,55 +619,55 @@ function M.references(bang, opts)
   local params = vim.lsp.util.make_position_params()
   params.context = { includeDeclaration = true }
   call_sync(
-    "textDocument/references", params, opts, partial(references_handler, bang)
+    "textDocument/references", params, opts, partial(references_handler)
   )
 end
 
-function M.document_symbol(bang, opts)
+function M.document_symbol(opts)
   if not check_capabilities("documentSymbolProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "textDocument/documentSymbol", params, opts, partial(document_symbol_handler, bang)
+    "textDocument/documentSymbol", params, opts, partial(document_symbol_handler)
   )
 end
 
-function M.workspace_symbol(bang, opts)
+function M.workspace_symbol(opts)
   if not check_capabilities("workspaceSymbolProvider") then
     return
   end
 
   local params = {query = opts.query or ''}
   call_sync(
-    "workspace/symbol", params, opts, partial(workspace_symbol_handler, bang)
+    "workspace/symbol", params, opts, partial(workspace_symbol_handler)
   )
 end
 
-function M.incoming_calls(bang, opts)
+function M.incoming_calls(opts)
   if not check_capabilities("callHierarchyProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "callHierarchy/incomingCalls", params, opts, partial(incoming_calls_handler, bang)
+    "callHierarchy/incomingCalls", params, opts, partial(incoming_calls_handler)
   )
 end
 
-function M.outgoing_calls(bang, opts)
+function M.outgoing_calls(opts)
   if not check_capabilities("callHierarchyProvider") then
     return
   end
 
   local params = vim.lsp.util.make_position_params()
   call_sync(
-    "callHierarchy/outgoingCalls", params, opts, partial(outgoing_calls_handler, bang)
+    "callHierarchy/outgoingCalls", params, opts, partial(outgoing_calls_handler)
   )
 end
 
-function M.code_action(bang, opts)
+function M.code_action(opts)
   if not check_capabilities("codeActionProvider") then
     return
   end
@@ -772,11 +677,11 @@ function M.code_action(bang, opts)
     diagnostics = vim.lsp.diagnostic.get_line_diagnostics(),
   }
   call_sync(
-    "textDocument/codeAction", params, opts, partial(code_action_handler, bang)
+    "textDocument/codeAction", params, opts, partial(code_action_handler)
   )
 end
 
-function M.range_code_action(bang, opts)
+function M.range_code_action(opts)
   if not check_capabilities("codeActionProvider") then
     return
   end
@@ -786,11 +691,11 @@ function M.range_code_action(bang, opts)
     diagnostics = vim.lsp.diagnostic.get_line_diagnostics()
   }
   call_sync(
-    "textDocument/codeAction", params, opts, partial(code_action_handler, bang)
+    "textDocument/codeAction", params, opts, partial(code_action_handler)
   )
 end
 
-function M.diagnostic(bang, opts)
+function M.diagnostic(opts)
   opts = opts or {}
 
   local bufnr = opts.bufnr or api.nvim_get_current_buf()
@@ -810,19 +715,19 @@ function M.diagnostic(bang, opts)
   for _, diag in ipairs(buffer_diags) do
     if severity then
       if not diag.severity then
-        goto continue
+        return
       end
 
       if severity ~= diag.severity then
-        goto continue
+        return
       end
     elseif severity_limit then
       if not diag.severity then
-        goto continue
+        return
       end
 
       if severity_limit < diag.severity then
-        goto continue
+        return
       end
     end
 
@@ -834,12 +739,11 @@ function M.diagnostic(bang, opts)
       type = vim.lsp.protocol.DiagnosticSeverity[diag.severity or
       vim.lsp.protocol.DiagnosticSeverity.Error]
     })
-    ::continue::
   end
 
   table.sort(items, function(a, b) return a.lnum < b.lnum end)
 
-  local joinfn = g.fzf_lsp_pretty and joindiag_pretty or joindiag_raw
+  local joinfn = joindiag_pretty or joindiag_raw
 
   local entries = {}
   for i, e in ipairs(items) do
@@ -851,11 +755,10 @@ function M.diagnostic(bang, opts)
     return
   end
 
-  fzf_locations(bang, "", "Diagnostics", entries, not show_all)
+  fzf_locations("", "Diagnostics", entries, not show_all)
 end
 -- }}}
 
--- LSP FUNCTIONS {{{
 M.code_action_call = partial(M.code_action, 0)
 M.range_code_action_call = partial(M.range_code_action, 0)
 M.definition_call = partial(M.definition, 0)
@@ -868,9 +771,7 @@ M.workspace_symbol_call = partial(M.workspace_symbol, 0)
 M.incoming_calls_call = partial(M.incoming_calls, 0)
 M.outgoing_calls_call = partial(M.outgoing_calls, 0)
 M.diagnostic_call = partial(M.diagnostic, 0)
--- }}}
 
--- LSP HANDLERS {{{
 M.code_action_handler = mk_handler(partial(code_action_handler, 0))
 M.definition_handler = mk_handler(partial(definition_handler, 0))
 M.declaration_handler = mk_handler(partial(declaration_handler, 0))
@@ -879,26 +780,8 @@ M.implementation_handler = mk_handler(partial(implementation_handler, 0))
 M.references_handler = mk_handler(partial(references_handler, 0))
 M.document_symbol_handler = mk_handler(partial(document_symbol_handler, 0))
 M.workspace_symbol_handler = mk_handler(partial(workspace_symbol_handler, 0))
-M.incoming_calls_handler = mk_handler(partial(incoming_calls_handler, 0))
-M.outgoing_calls_handler = mk_handler(partial(outgoing_calls_handler, 0))
--- }}}
 
--- Lua SETUP {{{
-M.setup = function(opts)
-  opts = opts or {
-    override_ui_select = true,
-  }
-
-  local function setup_nvim_0_6()
-    if opts.override_ui_select then
-      vim.ui.select = fzf_ui_select
-    end
-  end
-
-  if vim.version()["major"] >= 0 and vim.version()["minor"] >= 6 then
-    setup_nvim_0_6()
-  end
-
+M.setup = function()
   vim.lsp.handlers["textDocument/codeAction"] = M.code_action_handler
   vim.lsp.handlers["textDocument/definition"] = M.definition_handler
   vim.lsp.handlers["textDocument/declaration"] = M.declaration_handler
@@ -910,6 +793,5 @@ M.setup = function(opts)
   vim.lsp.handlers["callHierarchy/incomingCalls"] = M.incoming_calls_handler
   vim.lsp.handlers["callHierarchy/outgoingCalls"] = M.outgoing_calls_handler
 end
--- }}}
 
 return M
