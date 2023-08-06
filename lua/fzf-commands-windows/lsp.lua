@@ -1,5 +1,7 @@
 local vim, fn, api = vim, vim.fn, vim.api
 
+local term = require'fzf-commands-windows.term'
+
 local strings = require("plenary.strings")
 
 local delim = ' '
@@ -22,6 +24,13 @@ local kind_to_color = {
   ["Property"] = "yellow",
   ["Struct"] = "red",
   ["Variable"] = "cyan",
+}
+
+local diag_to_color = {
+  ["Error"] = term.brightmagenta,
+  ["Warning"] = term.yellow,
+  ["Info"] = term.brightred,
+  ["Hint"] = term.brightyellow
 }
 
 local M = {}
@@ -224,7 +233,8 @@ end
 
 -- Эта функция вызывается только в M.diagnostic
 local function joindiag_pretty(e, include_filename)
-  return e["type"]
+  return diag_to_color[e["type"]]
+    .. e["type"]
     .. ": "
     .. e["text"]:gsub("%s", " ")
     .. delim
@@ -232,6 +242,7 @@ local function joindiag_pretty(e, include_filename)
     .. e["lnum"]
     .. ":"
     .. e["col"]
+    .. term.reset
 end
 
 local function lines_from_locations(locations, include_filename)
@@ -388,10 +399,10 @@ local function fzf_locations(header, prompt, source, infile)
   if string.len(header) > 0 then
     table.insert(options, '--header="' .. header .. '"')
   end
-  options = table.concat(options, ' ')[1]
+  local opts = table.concat(options, ' ')
 
   coroutine.wrap(function()
-    local choice = require("fzf").fzf(source, options, fzfwinopts)
+    local choice = require("fzf").fzf(source, opts, fzfwinopts)
   end)()
 
   -- fzf_run(fzf_wrap("fzf_lsp", {
