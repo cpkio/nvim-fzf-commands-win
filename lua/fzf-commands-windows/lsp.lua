@@ -4,6 +4,13 @@ local strings = require("plenary.strings")
 
 local delim = ' '
 
+local fzfwinopts = {
+  border = false,
+  relative = "editor",
+  width = 280,
+  noautocmd = true
+}
+
 local kind_to_color = {
   ["Class"] = "blue",
   ["Constant"] = "cyan",
@@ -374,21 +381,18 @@ local function fzf_locations(header, prompt, source, infile)
 
   local options = {
     "--ansi",
-    "--multi",
   }
   if string.len(prompt) > 0 then
-    table.insert(options, "--prompt")
-    table.insert(options, prompt .. "> ")
+    table.insert(options, '--prompt="' .. prompt .. '> "')
   end
   if string.len(header) > 0 then
-    table.insert(options, "--header")
-    table.insert(options, header)
+    table.insert(options, '--header="' .. header .. '"')
   end
-  print(vim.inspect(
-    source
-  ))
+  options = table.concat(options, ' ')[1]
 
-
+  coroutine.wrap(function()
+    local choice = require("fzf").fzf(source, options, fzfwinopts)
+  end)()
 
   -- fzf_run(fzf_wrap("fzf_lsp", {
   --   source = source,
