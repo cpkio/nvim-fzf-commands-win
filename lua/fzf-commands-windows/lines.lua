@@ -78,7 +78,7 @@ return function(options)
         local _b, _f, _l, _t = string.match(lines[j], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)%s*' .. rg_delimiter .. '%s*(%S.+)')
         table.insert(itemsqf, { bufnr = tonumber(_b), filename = _f, lnum = tonumber(_l), text = _t})
       end
-      fn.setqflist({},'r',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
+      fn.setqflist({},' ',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
       api.command('botright copen')
     end
 

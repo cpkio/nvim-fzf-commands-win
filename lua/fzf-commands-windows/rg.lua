@@ -67,7 +67,7 @@ return function(opts, pattern)
           local parsed_content = parse_vimgrep_line(choices[j])
           table.insert(itemsqf, { filename = parsed_content.filename, lnum = tonumber(parsed_content.row), col = parsed_content.col, vcol = 1, text = parsed_content.text })
         end
-        fn.setqflist({}, 'r', { items = itemsqf, title = 'FzfRg' })
+        fn.setqflist({}, ' ', { items = itemsqf, title = 'FzfRg' })
         api.command('botright copen')
       end
     elseif choices[1] == "ctrl-v" then
