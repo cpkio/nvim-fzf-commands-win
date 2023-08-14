@@ -4,8 +4,6 @@ local action = require "fzf.actions".action
 
 local fn, api = utils.helpers()
 
-local d_delimiter = ' '
-
 return function(opts)
   local buffer_number = -1
 
@@ -29,7 +27,7 @@ return function(opts)
   opts = utils.normalize_opts(opts)
   coroutine.wrap(function ()
     local fname = fn.fnamemodify(api.buf_get_name(0), ":t") -- барахлит функция на многооконных раскладках, но ладно
-    local gitsrc = "git log --all --pretty=format:%H" .. d_delimiter .."%s" .. d_delimiter .. "%d -- *".. fname
+    local gitsrc = "git log --all --pretty=format:%H" .. utils.delim .."%s" .. utils.delim .. "%d -- *".. fname
     local fzfpreview = "git diff -R {1} -- *" .. fname .. " | delta --wrap-max-lines=unlimited " ..
     '--file-style=white                               ' ..
 
@@ -53,10 +51,10 @@ return function(opts)
     '--line-numbers-zero-style=white                  ' ..
     '--line-numbers-plus-style=yellow                 ' ..
     '--width=%FZF_PREVIEW_COLUMNS%'
-    local fzfcommand = term.fzf_colors .. '--prompt="GDiff> " --delimiter=' .. d_delimiter .. ' --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
+    local fzfcommand = term.fzf_colors .. '--prompt="GDiff> " --delimiter=' .. utils.delim .. ' --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
     local choices = opts.fzf(gitsrc, fzfcommand) -- проблема в fzfcommand
     if not choices then return end
-    local s = vim.split(choices[1], d_delimiter)
+    local s = vim.split(choices[1], utils.delim)
     local fnm = './' .. vim.fn.expand('%'):gsub('\\','/')
     open_buffer()
     vim.fn.jobstart({'git', 'show', '-t', s[1]..':'..fnm }, {

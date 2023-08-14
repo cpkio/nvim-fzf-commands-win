@@ -1,5 +1,7 @@
 local M = {}
 
+M.delim = ' '
+
 M.api = {
   __index = function(self, item)
     self[item] = vim.api["nvim_" .. item]

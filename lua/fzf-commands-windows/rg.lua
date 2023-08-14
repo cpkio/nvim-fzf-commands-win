@@ -4,8 +4,6 @@ local term = require "fzf-commands-windows.term"
 
 local fn, api = utils.helpers()
 
-local rg_delimiter=' '
-
 local function open_file(window_cmd, filename, row, col)
   vim.cmd(window_cmd .. " ".. vim.fn.fnameescape(filename))
   api.win_set_cursor(0, {row, col - 1})
@@ -13,7 +11,7 @@ local function open_file(window_cmd, filename, row, col)
 end
 
 local function parse_vimgrep_line(line)
-  local parsed_content = {string.match(line, "(.-)" .. rg_delimiter .. "(%d+)" .. rg_delimiter .. "(%d+)" .. rg_delimiter .. "(.*)")}
+  local parsed_content = {string.match(line, "(.-)" .. utils.delim .. "(%d+)" .. utils.delim .. "(%d+)" .. utils.delim .. "(.*)")}
   local filename = parsed_content[1]
   local row = tonumber(parsed_content[2])
   local col = tonumber(parsed_content[3])
@@ -49,11 +47,11 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'rg --vimgrep --pcre2 --no-heading --field-match-separator=' .. rg_delimiter .. ' ' .. fn.shellescape(pattern)
+  local rgcmd = 'rg --vimgrep --pcre2 --no-heading --field-match-separator=' .. utils.delim .. ' ' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--delimiter="' .. rg_delimiter .. '" --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--delimiter="' .. utils.delim .. '" --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end

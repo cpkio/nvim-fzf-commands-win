@@ -4,8 +4,6 @@ local utf = require "lua-utf8" -- sadly this is needed for non-ascii filenames
 
 local fn, api = utils.helpers()
 
-local rg_delimiter=' '
-
 local has_bat = vim.fn.executable("bat")
 
 local function parse_tag_line(line)
@@ -23,7 +21,7 @@ local function parse_tag_line(line)
 end
 
 local function parse_fzf_line(line)
-  local parsed_line = { utf.match(line, '^([^'..rg_delimiter..']+)'..rg_delimiter..'(%d+)') }
+  local parsed_line = { utf.match(line, '^([^'..utils.delim..']+)'..utils.delim..'(%d+)') }
   local filename = parsed_line[1]
   local linenum = parsed_line[2]
   return {
@@ -50,7 +48,7 @@ return function(options)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --line-range={2}:+20 --highlight-line={2} {1}'
   end
 
-  local opts = (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v --delimiter=' .. rg_delimiter .. ' --nth=3 --header-lines=0 --ansi --prompt="Ctags> " --preview=%s'):format(fn.shellescape(preview))
+  local opts = (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v --delimiter=' .. utils.delim .. ' --nth=3 --header-lines=0 --ansi --prompt="Ctags> " --preview=%s'):format(fn.shellescape(preview))
   options = utils.normalize_opts(options)
 
   coroutine.wrap(function ()
@@ -61,8 +59,8 @@ return function(options)
       for _, line in pairs(gettags()) do
         local ln = parse_tag_line(line)
         if ln.kind == "a" or ln.kind == "t" then
-          local decorated_line = term.blue .. ln.filename .. term.reset .. rg_delimiter ..
-                                term.green .. ln.linenum .. term.reset .. rg_delimiter ..
+          local decorated_line = term.blue .. ln.filename .. term.reset .. utils.delim ..
+                                term.green .. ln.linenum .. term.reset .. utils.delim ..
                                 tostring(ln.tag)
           table.insert(items, decorated_line)
         end

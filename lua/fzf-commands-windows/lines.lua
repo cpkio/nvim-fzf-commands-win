@@ -2,8 +2,6 @@ local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
-local rg_delimiter=' ' -- 0x202F
-
 return function(options)
 
   local function locate(bufnum)
@@ -20,7 +18,7 @@ return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = (term.fzf_colors .. '--delimiter="' .. rg_delimiter .. '" --reverse --header-lines=1 --nth=4 --multi --ansi --prompt="Lines> "')
+    local opts = (term.fzf_colors .. '--delimiter="' .. utils.delim .. '" --reverse --header-lines=1 --nth=4 --multi --ansi --prompt="Lines> "')
     local items = {}
 
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
@@ -37,11 +35,11 @@ return function(options)
         for linenum, line in pairs(buflines) do
           if #line > 0 then
             line = string.format("%-18s", term.red .. tostring(bufnum) .. term.reset) ..
-                   rg_delimiter ..
+                   utils.delim ..
                    string.format("%-18s", term.green .. tostring(filepath) .. term.reset) ..
-                   rg_delimiter ..
+                   utils.delim ..
                    string.format("%-18s", term.blue .. tostring(linenum) .. term.reset) ..
-                   rg_delimiter ..
+                   utils.delim ..
                    line
             table.insert(items, line)
           end
@@ -59,7 +57,7 @@ return function(options)
     end
 
     if #lines == 1 then
-      local _b, _, _l = string.match(lines[1], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)')
+      local _b, _, _l = string.match(lines[1], '^%s*(%d+)%s*' .. utils.delim .. '([^' .. utils.delim .. ']+)'.. utils.delim .. '%s*(%d+)')
       local buf = tonumber(_b); local ln = tonumber(_l)
       local bufinfo = fn.getbufinfo(buf)[1]
       if bufinfo.hidden == 1 then
@@ -75,7 +73,7 @@ return function(options)
     else
       local itemsqf = {}
       for j = 1, #lines do
-        local _b, _f, _l, _t = string.match(lines[j], '^%s*(%d+)%s*' .. rg_delimiter .. '([^' .. rg_delimiter .. ']+)'.. rg_delimiter .. '%s*(%d+)%s*' .. rg_delimiter .. '%s*(%S.+)')
+        local _b, _f, _l, _t = string.match(lines[j], '^%s*(%d+)%s*' .. utils.delim .. '([^' .. utils.delim .. ']+)'.. utils.delim .. '%s*(%d+)%s*' .. utils.delim .. '%s*(%S.+)')
         table.insert(itemsqf, { bufnr = tonumber(_b), filename = _f, lnum = tonumber(_l), text = _t})
       end
       fn.setqflist({},' ',{ id = 'FzfLines', items = itemsqf, title = 'FzfLines'})
