@@ -23,7 +23,7 @@ local winopts = {
 return function(options)
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = (term.fzf_colors .. '--reverse --header-lines=1 --multi --expect=ctrl-l,ctrl-p --ansi --prompt="BLines> "')
+    local opts = (term.fzf_colors .. '--delimiter="' .. rg_delimiter .. '" --reverse --nth=2 --header-lines=1 --multi --expect=ctrl-l,ctrl-p --ansi --prompt="BLines> "')
     local items = {}
 
     local buflines = api.buf_get_lines(0,0,-1,0)

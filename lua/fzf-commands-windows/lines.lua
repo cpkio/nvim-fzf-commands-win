@@ -3,7 +3,6 @@ local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
 local rg_delimiter=' ' -- 0x202F
--- local rg_delimiter=' '
 
 return function(options)
 
@@ -21,7 +20,7 @@ return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
-    local opts = (term.fzf_colors .. '--reverse --header-lines=1 --multi --ansi --prompt="Lines> "')
+    local opts = (term.fzf_colors .. '--delimiter="' .. rg_delimiter .. '" --reverse --header-lines=1 --nth=4 --multi --ansi --prompt="Lines> "')
     local items = {}
 
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
