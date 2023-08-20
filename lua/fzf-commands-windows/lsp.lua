@@ -30,7 +30,7 @@ local diag_to_color = {
   ["Error"] = term.brightmagenta,
   ["Warning"] = term.yellow,
   ["Info"] = term.brightred,
-  ["Hint"] = term.brightyellow
+  ["Hint"] = term.brightcyan
 }
 
 local M = {}
