@@ -38,6 +38,14 @@ end
 local has_bat = vim.fn.executable("bat")
 
 return function(opts, pattern)
+
+  local nth
+  if opts.nth then
+    nth = '--nth='..opts.nth
+  else
+    nth = ''
+  end
+
   local prompt = "Rg> "
   if pattern then prompt = "Rg (" .. fn.shellescape(pattern) .. ")> " end
   if not pattern then pattern = "^(?=.)" end
@@ -51,7 +59,7 @@ return function(opts, pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--delimiter="' .. utils.delim .. '" --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end
