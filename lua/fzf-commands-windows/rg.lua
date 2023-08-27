@@ -39,14 +39,12 @@ local has_bat = vim.fn.executable("bat")
 
 return function(opts, pattern)
 
-  local nth
+  local nth = ''
   if opts.nth then
     nth = '--nth='..opts.nth
-  else
-    nth = ''
   end
 
-  local extra
+  local extra = ''
   if opts.extra then
     extra = fn.join(opts.extra, ' ')
   end
@@ -64,7 +62,7 @@ return function(opts, pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. tostring(extra) .. ' --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. extra .. ' --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end
