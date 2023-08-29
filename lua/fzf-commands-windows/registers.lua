@@ -60,6 +60,7 @@ return function(options)
         cmd = 'let @' .. reg .. '=""'
         api.command(cmd)
       end
+      api.command('wshada!')
     end
 
   end)()
