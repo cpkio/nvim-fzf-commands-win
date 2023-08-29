@@ -22,7 +22,7 @@ return function(options)
       return
     end
 
-    vim.fn.execute(line)
+    fn.search(line)
 
   end)()
 end
