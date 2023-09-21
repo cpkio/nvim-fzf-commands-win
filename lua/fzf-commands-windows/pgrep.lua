@@ -76,8 +76,9 @@ return function(opts, pattern)
         args = args,
         stdio = { pipeout, pipein },
       }, function(code, signal)
-          vim.notify("exit code " .. code)
-          vim.notify("exit signal " .. signal)
+          if code == 1 then
+            vim.notify("Current buffer has no data for Ripgrep")
+          end
         end)
 
       local d = ''
