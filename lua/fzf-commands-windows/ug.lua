@@ -55,7 +55,7 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'ug4 --line-number --column-number --ungroup --color=always --colors=fn=b:ln=g:cn=r --separator=' .. utils.delim .. ' ' .. fn.shellescape(pattern)
+  local rgcmd = 'ug4 --line-number --column-number --ungroup --smart-case --ignore-binary --color=always --colors=fn=b:ln=g:cn=r:mt=y --separator="' .. utils.delim .. '" ' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()

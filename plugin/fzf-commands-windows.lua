@@ -16,3 +16,19 @@ vim.api.nvim_create_user_command('PGrep',
   end,
   { nargs = '?' }
 )
+
+vim.api.nvim_create_user_command('Rg',
+  function(opts)
+    require("fzf-commands-windows").rg({
+      fzf = fzfcmd }, opts.args)
+  end,
+  { nargs = '?' }
+)
+
+vim.api.nvim_create_user_command('Ug',
+  function(opts)
+    require("fzf-commands-windows").ug({
+      fzf = fzfcmd }, opts.args)
+  end,
+  { nargs = '?' }
+)
