@@ -48,9 +48,10 @@ local _return = vim.schedule_wrap(function(data, opts)
 
     local _res = string.match(choice[1], '%(%d+%)' .. utils.delim .. '(.+)')
 
+    local len = math.min(#_uniques[_res].locations, 7)
     for _, v in pairs(_uniques[_res].locations) do
       table.insert(itemsqf, {
-        bufnr =0,
+        bufnr = 0,
         vcol = 1,
         filename = fn.fnamemodify(api.buf_get_name(0), ':p:.'),
         lnum = v.line,
@@ -59,7 +60,7 @@ local _return = vim.schedule_wrap(function(data, opts)
     end
 
     fn.setqflist({}, ' ', { items = itemsqf, title = 'FzfRg' })
-
+    vim.cmd('copen' .. len)
   end)()
 
 end)
