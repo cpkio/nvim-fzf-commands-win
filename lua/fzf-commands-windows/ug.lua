@@ -46,8 +46,8 @@ return function(opts, pattern)
     nth = ''
   end
 
-  local prompt = "UGrep> "
-  if pattern then prompt = "UGrep (" .. pattern .. ")> " end
+  local prompt = "Rg> "; local header = ''
+  if pattern then header = ' --header-first --header=' .. fn.shellescape(pattern) end
   if not pattern then pattern = "" end
 
   local preview
@@ -55,11 +55,11 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'ug4 --line-number --column-number --ungroup --smart-case --ignore-binary --ignore-files --color=always --colors=fn=b:ln=g:cn=r:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
+  local rgcmd = 'ug4 --line-number --column-number --ungroup --smart-case --ignore-binary --ignore-files --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. '--exact --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt=' .. fn.shellescape(prompt) .. (' --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. ' --exact --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt=' .. fn.shellescape(prompt) .. header .. (' --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end
