@@ -14,7 +14,7 @@ vim.api.nvim_create_user_command('PGrep',
     require("fzf-commands-windows").pgrep({
       fzf = fzfcmd }, opts.args)
   end,
-  { nargs = '?' }
+  { nargs = 1 }
 )
 
 vim.api.nvim_create_user_command('Rg',
@@ -22,7 +22,7 @@ vim.api.nvim_create_user_command('Rg',
     require("fzf-commands-windows").rg({
       fzf = fzfcmd }, opts.args)
   end,
-  { nargs = '?' }
+  { nargs = 1 }
 )
 
 vim.api.nvim_create_user_command('Ug',
@@ -30,5 +30,5 @@ vim.api.nvim_create_user_command('Ug',
     require("fzf-commands-windows").ug({
       fzf = fzfcmd }, opts.args)
   end,
-  { nargs = '?' }
+  { nargs = 1 }
 )

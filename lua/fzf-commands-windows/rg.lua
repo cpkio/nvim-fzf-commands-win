@@ -50,7 +50,7 @@ return function(opts, pattern)
   end
 
   local prompt = "Rg> "
-  if pattern then prompt = "Rg (" .. fn.shellescape(pattern) .. ")> " end
+  if pattern then prompt = "Rg (" .. pattern .. ")> " end
   if not pattern then pattern = "^(?=.)" end
 
   local preview
@@ -58,11 +58,11 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'rg --vimgrep --pcre2 --no-heading --field-match-separator=' .. utils.delim .. ' ' .. fn.shellescape(pattern)
+  local rgcmd = 'rg --vimgrep --pcre2 --no-heading --field-match-separator="' .. utils.delim .. '" ' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. extra .. ' --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt="' .. prompt .. ('" --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. extra .. ' --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt=' .. fn.shellescape(prompt) .. (' --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end
