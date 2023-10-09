@@ -27,60 +27,65 @@ Use `--excmd=combine` to add line numbers to `tags` file.
 
 ## TODO
 
-* [x] Files
-  - [x] `CTRL-S` to open file in a split
-  - [x] `CTRL-V` to open file in a vertical split
-  - [x] `CTRL-T` to open file in a new tab
+1. [x] Files
+   - [x] `CTRL-S` to open file in a split
+   - [x] `CTRL-V` to open file in a vertical split
+   - [x] `CTRL-T` to open file in a new tab
 
-* [x] Marks
-  - [x] `CTRL-Q` to delete mark(s)
-  - [x] `CTRL-S` to open mark(s) location in a split
-  - [x] `CTRL-V` to open mark(s) location in a vertical split
-  - [x] `CTRL-T` to open mark(s) location in a new tab
+2. [x] Marks
+   - [x] `CTRL-Q` to delete mark(s)
+   - [x] `CTRL-S` to open mark(s) location in a split
+   - [x] `CTRL-V` to open mark(s) location in a vertical split
+   - [x] `CTRL-T` to open mark(s) location in a new tab
 
-* [x] Registers
-  - [x] `CTRL-Q` to delete register(s)
-  - [x] `CTRL-P` to paste register(s) before
-  - [x] `ENTER` to paste register(s)
+3. [x] Registers
+   - [x] `CTRL-Q` to delete register(s)
+   - [x] `CTRL-P` to paste register(s) before
+   - [x] `ENTER` to paste register(s)
 
-* [x] Buffers
-  - [x] `ENTER` to go to ONE single selected buffer (hidden opens in curent window, active moves focus to tab and window of the buffer)
-  - [x] `CTRL-Q` to delete buffer(s)
-  - [x] `CTRL-S` to open buffer(s) in a split
-  - [x] `CTRL-V` to open buffer(s) in a vertical split
-  - [x] `CTRL-T` to open buffer(s) in a new tab
+4. [x] Buffers
+   - [x] `ENTER` to go to ONE single selected buffer (hidden opens in curent window, active moves focus to tab and window of the buffer)
+   - [x] `CTRL-Q` to delete buffer(s)
+   - [x] `CTRL-S` to open buffer(s) in a split
+   - [x] `CTRL-V` to open buffer(s) in a vertical split
+   - [x] `CTRL-T` to open buffer(s) in a new tab
 
-* [x] BLines
-  - [x] Multiple selections go to quickfix list on `ENTER` and location list on `ALT-ENTER`
+5. [x] BLines = lines from current buffer
+   - [x] Multiple selections go to quickfix list on `ENTER` and location list on `ALT-ENTER`
 
-* [x] Lines
-  - [ ] `CTRL-S` to open buffer in a split and go to this line
-  - [ ] `CTRL-V` to open buffer in a vertical split and go to this line
-  - [ ] `CTRL-T` to open buffer in a new tab (get file name from buffer, open in new tab) go to this line
-  - [x] Multiple selections go to quickfix list on `ENTER`
+6. [x] Lines = lines from all buffers
+   - [ ] `CTRL-S` to open buffer in a split and go to this line
+   - [ ] `CTRL-V` to open buffer in a vertical split and go to this line
+   - [ ] `CTRL-T` to open buffer in a new tab (get file name from buffer, open in new tab) go to this line
+   - [x] Multiple selections go to quickfix list on `ENTER`
 
-* [x] Filetypes
+7. [x] Filetypes
 
-* [x] Rg
-  - [x] Push to QuickFix list on `Enter` if multiple items selected
+8. [x] Rg
+   - [x] Push to QuickFix list on `Enter` if multiple items selected
+   - [x] `:Rg` command to search by Ripgrep regex
 
-* [ ] RgNot (show files with no matches)
+9. [x] UGrep
+   - [x] Push to QuickFix list on `Enter` if multiple items selected
+   - [x] `:Ug` command to search by uGrep regex
 
-* [ ] GFiles
-* [ ] GFiles?
-* [x] GDiff
-  - [x] Open chosen commit file in a vertical split with diff on (if you want something from it to your current file)
-* [x] Ctags: Show all tags from a current `tags` file and go to each tags
-      location. Tags format is defined in my config and includes lines numbers
-      to parse
-* [ ] Windows
-* [x] Commands History
-* [x] Search History
-* [ ] Commits
-* [ ] BCommits
+10. [x] GDiff = find all the Git-changes for current file
+    - [x] Open chosen commit file in a vertical split with diff on (if you want something from it to your current file)
 
-## Should I?
+11. [x] Ctags: Show all tags from a current `tags` file and go to each tags
+        location. Tags format is defined in my config and includes lines numbers
+        to parse
 
-* Helptags
-* Snippets
-* Branches (switch Git branches)
+12. [x] Commands History
+
+13. [x] Search History
+
+14. [x] Directories
+    - `ENTER` to change current tab directory,
+    - `CTRL-L` (local) to change current window directory,
+    - `CTRL-G` (global) to change directory of Neovim instance
+
+15. [x] PGrep = PowerGrep functionality for searching unique entries by
+    regular expression. Usage: `:PGrep <regex>`
+
+16. [ ] LSP = Work in Progress, only Diagnostics available for now
