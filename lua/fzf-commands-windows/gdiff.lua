@@ -14,21 +14,21 @@ return function(opts)
         local w, _ = v:gsub('\r', '')
         table.insert(r, w)
       end
-      vim.api.nvim_buf_set_lines(buffer_number, -1, -1, true, r)
+      api.buf_set_lines(buffer_number, -1, -1, true, r)
     end
   end
 
   local function open_buffer()
     if buffer_number == -1 then
-      vim.api.nvim_command('botright vnew')
-      buffer_number = vim.api.nvim_get_current_buf()
+      api.command('botright vnew')
+      buffer_number = api.get_current_buf()
     end
   end
   opts = utils.normalize_opts(opts)
   coroutine.wrap(function ()
-    local fname = fn.fnamemodify(api.buf_get_name(0), ":t") -- барахлит функция на многооконных раскладках, но ладно
-    local gitsrc = "git log --all --pretty=format:%H" .. utils.delim .."%s" .. utils.delim .. "%d -- *".. fname
-    local fzfpreview = "git diff -R {1} -- *" .. fname .. " | delta --wrap-max-lines=unlimited " ..
+    local fname = fn.fnamemodify(api.buf_get_name(0), ":t")
+    local gitsrc = 'git log --all --color=always --pretty=format:"%C(green)%cs%C(reset)' .. utils.delim .. '%C(cyan)%h%C(reset)' .. utils.delim ..'%s' .. utils.delim .. '%d" -- *' .. fname
+    local fzfpreview = 'git diff -R {2} -- *' .. fname .. ' | delta --wrap-max-lines=unlimited ' ..
     '--file-style=white                               ' ..
 
     '--minus-style=brightred                          ' ..
@@ -51,13 +51,13 @@ return function(opts)
     '--line-numbers-zero-style=white                  ' ..
     '--line-numbers-plus-style=yellow                 ' ..
     '--width=%FZF_PREVIEW_COLUMNS%'
-    local fzfcommand = term.fzf_colors .. '--prompt="GDiff> " --delimiter=' .. utils.delim .. ' --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
-    local choices = opts.fzf(gitsrc, fzfcommand) -- проблема в fzfcommand
+    local fzfcommand = term.fzf_colors .. ' --ansi --prompt="GDiff> " --delimiter="' .. utils.delim .. '" --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
+    local choices = opts.fzf(gitsrc, fzfcommand)
     if not choices then return end
-    local s = vim.split(choices[1], utils.delim)
-    local fnm = './' .. vim.fn.expand('%'):gsub('\\','/')
+    local _, s, _ = unpack(fn.split(choices[1], utils.delim .. '\\+'))
+    local fnm = './' .. fn.expand('%'):gsub('\\','/')
     open_buffer()
-    vim.fn.jobstart({'git', 'show', '-t', s[1]..':'..fnm }, {
+    fn.jobstart({'git', 'show', '-t', s .. ':' .. fnm }, {
       stdout_buffered = true,
       overlapped = true,
       on_stdout = log,
