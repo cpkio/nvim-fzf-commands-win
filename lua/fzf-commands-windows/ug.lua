@@ -46,7 +46,7 @@ return function(opts, pattern)
     nth = ''
   end
 
-  local prompt = "Rg> "; local header = ''
+  local prompt = "UGrep> "; local header = ''
   if pattern then header = ' --header-first --header=' .. fn.shellescape(pattern) end
   if not pattern then pattern = "" end
 
