@@ -30,7 +30,9 @@ return function(options)
     local getmarks = api.buf_get_extmarks
     for _, u in pairs(ns) do
       for _, v in pairs(getmarks(0, u, 0, -1, { details = true})) do
-        table.insert(extmarks, { v[2]+1, tostring(unpack(unpack(unpack(v[4].virt_lines)))) })
+        local _t = ''
+        if v[4].virt_lines then _t = unpack(unpack(unpack(v[4].virt_lines))) end
+        table.insert(extmarks, { v[2]+1, _t })
       end
     end
     table.sort(extmarks, function(a,b) return a[1] < b[1] end)
