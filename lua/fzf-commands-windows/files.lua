@@ -19,7 +19,7 @@ return function(opts)
 
   coroutine.wrap(function ()
     local choices = opts.fzf(command,
-      (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v --prompt="Files> " --multi --preview=%s'):format(fn.shellescape(preview)))
+      (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v,ctrl-r --prompt="Files> " --multi --preview=%s'):format(fn.shellescape(preview)))
 
     if not choices then return end
 
@@ -27,9 +27,11 @@ return function(opts)
     if choices[1] == "ctrl-t" then
       vimcmd = "tabnew"
     elseif choices[1] == "ctrl-v" then
-      vimcmd = "vnew"
+      vimcmd = "botright vs"
     elseif choices[1] == "ctrl-s" then
       vimcmd = "new"
+    elseif choices[1] == "ctrl-r" then
+      vimcmd = "r"
     else
       vimcmd = "e"
     end
