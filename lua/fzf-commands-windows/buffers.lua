@@ -2,19 +2,24 @@ local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
-return function(options)
-
-  local function locate(bufnum)
-    for tab = 1, vim.fn.tabpagenr('$') do
-      local buffers = vim.fn.tabpagebuflist(tab)
-      for k, buf in pairs(buffers) do
-        if bufnum == buf then
-          return tab, k
-        end
+local function locate(bufnum)
+  for tab = 1, vim.fn.tabpagenr('$') do
+    local buffers = vim.fn.tabpagebuflist(tab)
+    for k, buf in pairs(buffers) do
+      if bufnum == buf then
+        return tab, k
       end
     end
-    return 0, 0
   end
+  return 0, 0
+end
+
+local function buf(line)
+  local bufnum, _ = tonumber(string.match(line, '^%s*(%d+)'))
+  return bufnum
+end
+
+return function(options)
 
   coroutine.wrap(function()
     options = utils.normalize_opts(options)
@@ -53,7 +58,7 @@ return function(options)
 
    local cmd
     if lines[1] == "" then
-      local bufnum, _ = tonumber(string.match(lines[2], '^%s*(%d+)'))
+      local bufnum, _ = buf(lines[2])
       local bufinfo = fn.getbufinfo(bufnum)[1]
       if bufinfo.hidden == 1 then
         api.win_set_buf(fn.win_getid(), bufnum)
@@ -67,29 +72,28 @@ return function(options)
     end
     if lines[1] == "ctrl-q" then
       for i = 2, #lines do
-        local bufnum, _ = string.match(lines[i], '^%s*(%d+)')
-        cmd = 'bdelete! ' .. bufnum
+        cmd = 'bdelete! ' .. buf(lines[i])
         api.command(cmd)
       end
     end
     if lines[1] == "ctrl-s" then
       for i = 2, #lines do
-        local bufnum, _ = tonumber(string.match(lines[i], '^%s*(%d+)'))
+        local bufnum, _ = buf(lines[i])
         cmd = 'split ' .. fn.getbufinfo(bufnum)[1].name
         api.command(cmd)
       end
     end
     if lines[1] == "ctrl-v" then
       for i = 2, #lines do
-        local bufnum, _ = tonumber(string.match(lines[i], '^%s*(%d+)'))
+        local bufnum, _ = buf(lines[i])
         cmd = 'vsplit ' .. fn.getbufinfo(bufnum)[1].name
         api.command(cmd)
       end
     end
     if lines[1] == "ctrl-t" then
       for i = 2, #lines do
-        local bufnum, _ = string.match(lines[i], '^%s*(%d+)')
-        cmd = 'tabnew ' .. fn.getbufinfo(bufnum)[1].name
+        local bufnum, _ = buf(lines[i])
+        cmd = 'tabedit ' .. fn.getbufinfo(bufnum)[1].name
         api.command(cmd)
       end
     end
