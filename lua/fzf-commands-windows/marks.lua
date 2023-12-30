@@ -21,7 +21,7 @@ return function(options)
 
     for line in mrklist:gmatch('([^\n]*)\n?') do
       local linefmt = string.format("%q", line)
-      local mrk, ln, _, mrkdata = string.match(linefmt, '^"%s*([a-zA-Z0-9])%s+(%d+)%s+(%d+)%s+([^"]*)')
+      local mrk, ln, _, mrkdata = string.match(linefmt, '"%s*([a-zA-Z0-9])%s+(%d+)%s+(%d+)%s+(.*)"')
       if mrk then
         mrk = string.gsub(mrk, [[\(.)]], '%1')
         mrkdata = string.gsub(mrkdata, [[\(.)]], '%1')
