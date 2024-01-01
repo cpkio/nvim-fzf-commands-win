@@ -40,27 +40,30 @@ local _return = vim.schedule_wrap(function(data, opts)
   local prompt = 'Uniques> '
 
   coroutine.wrap(function()
-    local choice = opts.fzf(items, term.fzf_colors .. ' --delimiter="' .. utils.delim .. '" --nth=2 --ansi --prompt="' .. prompt .. '"')
+    local choices = opts.fzf(items, term.fzf_colors .. ' --multi --delimiter="' .. utils.delim .. '" --nth=2 --ansi --prompt="' .. prompt .. '"')
 
-    if not choice then return end
+    if not choices then return end
 
-    local itemsqf = {}
+    local allqf = {}
+    for _, value in pairs(choices) do
+      local itemsqf = {}
+      local _res = string.match(value, '%(%d+%)' .. utils.delim .. '(.+)')
 
-    local _res = string.match(choice[1], '%(%d+%)' .. utils.delim .. '(.+)')
-
-    local len = math.min(#_uniques[_res].locations, 7)
-    for _, v in pairs(_uniques[_res].locations) do
-      table.insert(itemsqf, {
-        bufnr = 0,
-        vcol = 1,
-        filename = fn.fnamemodify(api.buf_get_name(0), ':p:.'),
-        lnum = v.line,
-        col = v.column,
-        text = _res })
+      for _, v in pairs(_uniques[_res].locations) do
+        table.insert(itemsqf, {
+          bufnr = 0,
+          vcol = 1,
+          filename = fn.fnamemodify(api.buf_get_name(0), ':p:.'),
+          lnum = v.line,
+          col = v.column,
+          text = _res })
+      end
+      vim.list_extend(allqf, itemsqf)
     end
+    local qfsize = math.min(#allqf, 9)
 
-    fn.setqflist({}, ' ', { items = itemsqf, title = 'FzfRg' })
-    vim.cmd('copen' .. len)
+    fn.setqflist({}, ' ', { items = allqf, title = 'FzfRg' })
+    vim.cmd('copen' .. qfsize)
   end)()
 
 end)
@@ -106,5 +109,5 @@ return function(opts, pattern)
   end
 
   local text = fn.join(api.buf_get_lines(0, 0 , -1, false), '\n')
-  pipe(text, 'rg', { '--json', pattern })
+  pipe(text, 'rg', { '--pcre2', '--json', pattern })
 end
