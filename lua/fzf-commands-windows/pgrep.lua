@@ -26,7 +26,7 @@ local _return = vim.schedule_wrap(function(data, opts)
     end
   end
 
-  local items = {}
+  local items = { term.green .. 'ENTER' .. term.reset .. ' to expand entry locations to QuickFix list' }
 
   for k, v in pairs(_uniques) do
     table.insert(items,
@@ -40,7 +40,7 @@ local _return = vim.schedule_wrap(function(data, opts)
   local prompt = 'Uniques> '
 
   coroutine.wrap(function()
-    local choices = opts.fzf(items, term.fzf_colors .. ' --multi --delimiter="' .. utils.delim .. '" --nth=2 --ansi --prompt="' .. prompt .. '"')
+    local choices = opts.fzf(items, term.fzf_colors .. ' --header-lines=1 --multi --delimiter="' .. utils.delim .. '" --nth=2 --ansi --prompt="' .. prompt .. '"')
 
     if not choices then return end
 
