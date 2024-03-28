@@ -62,7 +62,7 @@ return function(opts, pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
-    local choices = opts.fzf(rgcmd, term.fzf_colors .. extra .. ' --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --expect=ctrl-t,ctrl-s,ctrl-v --prompt=' .. fn.shellescape(prompt) .. header .. (' --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
+    local choices = opts.fzf(rgcmd, term.fzf_colors .. extra .. ' --delimiter="' .. utils.delim .. '" ' .. nth .. ' --multi --ansi --layout=reverse --expect=ctrl-t,ctrl-s,ctrl-v --prompt=' .. fn.shellescape(prompt) .. header .. (' --preview-window=+{2}-3 --preview=%s'):format(fn.shellescape(preview))
     )
 
     if not choices then return end
