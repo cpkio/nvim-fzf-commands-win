@@ -55,11 +55,14 @@ local has_bat = vim.fn.executable("bat")
 
 return function(opts, pattern)
 
-  local nth
+  local nth = ''
   if opts.nth then
     nth = '--nth='..opts.nth
-  else
-    nth = ''
+  end
+
+  local inverse = ''
+  if opts.inverse then
+    inverse = '--invert-match'
   end
 
   local prompt = "UGrep> "; local header = ''
@@ -71,7 +74,7 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'ug --line-number --column-number --ungroup --smart-case --ignore-binary --ignore-files --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
+  local rgcmd = 'ug '.. inverse ..' --line-number --column-number --ungroup --smart-case --ignore-binary --ignore-files --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
