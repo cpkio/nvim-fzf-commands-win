@@ -27,6 +27,6 @@ term.brightmagenta = "\x1b[95m"
 term.brightcyan = "\x1b[96m"
 term.brightwhite = "\x1b[97m"
 
-term.fzf_colors = " --no-bold --black --color=16,hl:3,fg+:2,bg+:-1,gutter:-1,hl+:11,query:11,info:14,disabled:13,scrollbar:15,pointer:11 "
+term.fzf_colors = " --color=16,hl:3,selected-hl:3,fg+:2,gutter:-1,hl+:11,query:11,info:14,disabled:13,scrollbar:15,pointer:11 "
 
 return term
