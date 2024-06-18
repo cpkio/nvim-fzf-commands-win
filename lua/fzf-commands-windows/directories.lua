@@ -7,7 +7,7 @@ return function(opts)
   opts = utils.normalize_opts(opts)
   local command
   if fn.executable("fd") == 1 then
-    command = 'fd --color=never --type=directory -d 8 --base-directory="..\\..\\..\\.."'
+    command = 'fd --no-ignore --color=never --type=directory -d 8 --base-directory="..\\..\\..\\.."'
   end
 
   coroutine.wrap(function ()
