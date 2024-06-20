@@ -29,20 +29,31 @@ return function(options)
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
 
     for line in reglist:gmatch('([^\n]*)\n?') do
-      local bufnum, status, active, modified, filepath, linenum = string.match(line, '^%s*(%d+)%s+(%p?)(%w)%s*(%+?)%s*"([^"]+)"%s*line%s*(%d+)')
+      local bufnum, status, active, ro, modified, filepath, linenum = string.match(line, '^%s*(%d+)%s+(%p?)(%w)(%=?)%s*(%+?)%s*"([^"]+)"%s*line%s*(%d+)')
+      print(
+        "bufnum `"   ,  bufnum   ,'`',
+        "status `"   ,  status   ,'`',
+        "active `"   ,  active   ,'`',
+        "ro `"       ,  ro       ,'`',
+        "modified `" ,  modified ,'`',
+        "filepath `" ,  filepath ,'`',
+        "linenum `"  ,  linenum  ,'`'
+      )
       if bufnum then
         if filepath == "" then
           filepath = "[No name]"
         end
-        if modified ~= "" then modified = "⚠" else modified = "  " end
-        local item_string = string.format("%-20s", term.green .. tostring(bufnum) .. term.reset) ..
-                            string.format("%-20s", term.brightred .. tostring(modified) .. ' ' .. term.reset) ..
+        if modified == "+" then modified = "⚠" else modified = "  " end
+        if ro == "=" then ro = "" else ro = "  " end
+        local item_string = string.format("%-16s", term.green .. tostring(bufnum) .. term.reset) ..
+                            string.format("%-14s", term.yellow .. tostring(modified) .. ' ' .. term.reset) ..
+                            string.format("%-14s", term.brightred .. tostring(ro) .. ' ' .. term.reset) ..
                             term.blue .. filepath .. term.reset
         table.insert(items, item_string)
       end
     end
 
-    local head = '#      ?    file'
+    local head = '  #  ?  r  file'
     local tip = term.green .. 'CTRL-Q' .. term.reset .. ' to delete buffer(s). ' ..
                 term.green .. 'CTRL-S' .. term.reset .. ' to open in horizontal split. ' ..
                 term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
