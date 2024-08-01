@@ -234,14 +234,12 @@ end
 -- Эта функция вызывается только в M.diagnostic
 local function joindiag_pretty(e, include_filename)
   return diag_to_color[e["type"]]
-    .. e["type"]
+    .. e["lnum"]
     .. ": "
+    .. '(' .. e["type"] .. ') '
     .. e["text"]:gsub("%s", " ")
     .. delim
     .. fnamemodify(e["filename"], include_filename)
-    .. e["lnum"]
-    .. ":"
-    .. e["col"]
     .. term.reset
 end
 
@@ -392,6 +390,8 @@ local function fzf_locations(header, prompt, source, infile)
 
   local options = {
     "--ansi",
+    "--multi",
+    "--reverse"
   }
   if string.len(prompt) > 0 then
     table.insert(options, '--prompt="' .. prompt .. '> "')
@@ -402,7 +402,23 @@ local function fzf_locations(header, prompt, source, infile)
   local opts = table.concat(options, ' ')
 
   coroutine.wrap(function()
-    local choice = require("fzf").fzf(source, opts, fzfwinopts)
+    local lines = require("fzf").fzf(source, opts, fzfwinopts)
+    if not lines then
+      return
+    end
+    if #lines == 1 then
+      local linenum, _ = string.match(lines[1], '^%s*(%d+)')
+      api.nvim_command(linenum)
+    else
+      local bufnum = api.nvim_get_current_buf()
+      local itemsqf = {}
+      for j = 1, #lines do
+        local linenum, line = string.match(lines[j], '^%s*(%d+):%s*(%S.+)')
+        table.insert(itemsqf, { bufnr = bufnum, lnum = tonumber(linenum), text = line })
+      end
+      fn.setqflist({},' ',{ id = 'FzfDiag', items = itemsqf, title = 'FzfDiag'})
+      api.nvim_command('botright copen')
+    end
   end)()
 
   -- fzf_run(fzf_wrap("fzf_lsp", {
