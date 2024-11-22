@@ -74,7 +74,7 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'ug '.. inverse ..' --line-number --column-number --ungroup --smart-case --ignore-binary --ignore-files --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
+  local rgcmd = 'ug '.. inverse ..' --line-number --column-number --ungroup --perl-regexp --smart-case --ignore-binary --ignore-files --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
