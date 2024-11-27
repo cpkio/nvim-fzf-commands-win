@@ -32,6 +32,13 @@ vim.api.nvim_create_user_command('Ug',
   end,
   { nargs = 1 }
 )
+vim.api.nvim_create_user_command('UG',
+  function(opts)
+    require("fzf-commands-windows").ug({
+      fzf = fzfcmd, hidden = true }, opts.args)
+  end,
+  { nargs = 1 }
+)
 vim.api.nvim_create_user_command('UgN',
   function(opts)
     require("fzf-commands-windows").ug({

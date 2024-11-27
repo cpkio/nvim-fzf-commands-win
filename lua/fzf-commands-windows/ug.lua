@@ -65,6 +65,13 @@ return function(opts, pattern)
     inverse = '--invert-match'
   end
 
+  local hidden = ''
+  if opts.hidden then
+    hidden = '--hidden'
+  else
+    hidden = '--ignore-files'
+  end
+
   local prompt = "UGrep> "; local header = ''
   if pattern then header = ' --header-first --header=' .. fn.shellescape(pattern) end
   if not pattern then pattern = "" end
@@ -74,7 +81,7 @@ return function(opts, pattern)
     preview = vim.env.FZF_PREVIEW_COMMAND .. ' --highlight-line={2} {1}'
   end
 
-  local rgcmd = 'ug '.. inverse ..' --line-number --column-number --ungroup --perl-regexp --smart-case --ignore-binary --ignore-files --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
+  local rgcmd = 'ug '.. inverse ..' --line-number --column-number --ungroup --perl-regexp --smart-case --ignore-binary ' .. hidden .. ' --color=always --colors=fn=m:ln=g:cn=b:mt=y --separator="' .. utils.delim .. '" --regexp=' .. fn.shellescape(pattern)
   opts = utils.normalize_opts(opts)
 
   coroutine.wrap(function ()
