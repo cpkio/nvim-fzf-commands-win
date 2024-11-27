@@ -5,9 +5,15 @@ local fn, api = utils.helpers()
 return function(opts)
 
   opts = utils.normalize_opts(opts)
+
+  local extra = ''
+  if opts.extra then
+    extra = fn.join(opts.extra, ' ')
+  end
+
   local command
   if fn.executable("fd") == 1 then
-    command = "fd --no-require-git --color never -tf -L --strip-cwd-prefix"
+    command = 'fd ' .. extra ..  ' --no-require-git --color never -tf -L --strip-cwd-prefix'
   end
 
   local preview
