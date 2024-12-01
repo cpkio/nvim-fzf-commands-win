@@ -12,7 +12,8 @@ return function(opts)
   end
 
   -- local preview = 'git --git-dir=./{2}/.git --work-tree=./{2} show-branch'
-  local preview = 'git --git-dir=' .. vim.g.antora_docs_root .. '/{2}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{2} log --color=always --oneline --all --abbrev-commit --graph --decorate'
+  local preview = 'git --git-dir=' .. vim.g.antora_docs_root .. '/{2}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{2} branch --color=always --no-column' .. '&& echo:' ..
+                  '&& git --git-dir=' .. vim.g.antora_docs_root .. '/{2}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{2} log --color=always --oneline --all --abbrev-commit --graph --decorate'
 
   local cmd = {
     'fd',
