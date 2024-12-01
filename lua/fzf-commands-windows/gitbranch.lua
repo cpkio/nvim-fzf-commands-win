@@ -12,7 +12,7 @@ return function(opts)
   end
 
   -- local preview = 'git --git-dir=./{2}/.git --work-tree=./{2} show-branch'
-  local preview = 'git --git-dir=./{2}/.git --work-tree=./{2} log --color=always --oneline --all --abbrev-commit --graph --decorate'
+  local preview = 'git --git-dir=' .. vim.g.antora_docs_root .. '/{2}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{2} log --color=always --oneline --all --abbrev-commit --graph --decorate'
 
   local cmd = {
     'fd',
@@ -20,7 +20,11 @@ return function(opts)
     '--threads', '8',
     '--type=directory',
     '-d', '1',
-    '--exec', 'git', '--git-dir={}/.git', '--work-tree={}', 'rev-parse', '--abbrev-ref', 'HEAD', '--path-format=relative', '--show-toplevel'
+    '--exec', 'git', '--git-dir={}/.git', '--work-tree={}',
+                     'rev-parse',
+                     '--abbrev-ref', 'HEAD',
+                     '--path-format=relative',
+                     '--show-toplevel'
   }
 
   local res = {}
@@ -37,7 +41,7 @@ return function(opts)
     end
   end
 
-  vim.system(cmd, { text = true }, on_exit):wait()
+  vim.system(cmd, { text = true, cwd = vim.g.antora_docs_root }, on_exit):wait()
 
   coroutine.wrap(function ()
     local choices = opts.fzf(res,
