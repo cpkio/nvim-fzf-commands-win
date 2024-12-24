@@ -24,8 +24,12 @@ return function(opts)
   end
 
   coroutine.wrap(function ()
+    local tip = term.green .. 'CTRL-R' .. term.reset .. ' to paste content at cursor. ' ..
+                term.green .. 'CTRL-S' .. term.reset .. ' to open in horizontal split. ' ..
+                term.green .. 'CTRL-V' .. term.reset .. ' to open in vertical split. ' ..
+                term.green .. 'CTRL-T' .. term.reset .. ' to open in new tab. '
     local choices = opts.fzf(command,
-      (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v,ctrl-r --prompt="Files> " --multi --preview=%s'):format(fn.shellescape(preview)))
+      (term.fzf_colors .. '--expect=ctrl-s,ctrl-t,ctrl-v,ctrl-r,ctrl-p --header="' .. tip .. '" --prompt="Files> " --multi --preview=%s'):format(fn.shellescape(preview)))
 
     if not choices then return end
 
@@ -38,6 +42,8 @@ return function(opts)
       vimcmd = "new"
     elseif choices[1] == "ctrl-r" then
       vimcmd = "r"
+    elseif choices[1] == "ctrl-p" then
+      -- paste list of selected files
     else
       vimcmd = "e"
     end
