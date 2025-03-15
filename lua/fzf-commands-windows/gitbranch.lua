@@ -11,16 +11,18 @@ return function(opts)
     extra = fn.join(opts.extra, ' ')
   end
 
-  -- local preview = 'git --git-dir=./{2}/.git --work-tree=./{2} show-branch'
-  local preview = 'git --git-dir=' .. vim.g.antora_docs_root .. '/{2}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{2} branch --color=always --no-column' .. '&& echo:' ..
-                  '&& git --git-dir=' .. vim.g.antora_docs_root .. '/{2}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{2} log --color=always --oneline --all --abbrev-commit --graph --decorate'
+  -- local preview = 'git --git-dir=./{1}/.git --work-tree=./{1} show-branch'
+  local preview = 'git --git-dir=' .. vim.g.antora_docs_root .. '/{1}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{1} branch --color=always --no-column' .. '&& echo:' ..
+                  '&& git --git-dir=' .. vim.g.antora_docs_root .. '/{1}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{1} log --color=always --oneline --all --abbrev-commit --graph --decorate' ..
+                  '&& git --git-dir=' .. vim.g.antora_docs_root .. '/{1}/.git --work-tree=' .. vim.g.antora_docs_root .. '/{1} status'
 
   local cmd = {
     'fd',
     '--color', 'never',
-    '--threads', '8',
+    -- '--threads', '8',
     '--type=directory',
     '-d', '1',
+    '--prune',
     '--exec', 'git', '--git-dir={}/.git', '--work-tree={}',
                      'rev-parse',
                      '--abbrev-ref', 'HEAD',
@@ -35,9 +37,9 @@ return function(opts)
     for i = 1, #capture/2 do
       table.insert(
         res,
-        utils.pad( term.green .. capture[i*2 - 1] .. term.reset , 20) ..
+        term.blue .. string.format('%-30s', capture[i*2]) .. term.reset ..
         utils.delim ..
-        term.blue .. capture[i*2] .. term.reset
+        term.green .. capture[i*2 - 1] .. term.reset
     )
     end
   end
@@ -46,6 +48,6 @@ return function(opts)
 
   coroutine.wrap(function ()
     local choices = opts.fzf(res,
-      (term.fzf_colors .. ' --ansi --delimiter="' .. utils.delim .. '" --prompt="Branches> " --preview=%s'):format(fn.shellescape(preview)))
+      (term.fzf_colors .. ' --tiebreak=begin --ansi --delimiter="' .. utils.delim .. '" --prompt="Branches> " --preview=%s'):format(fn.shellescape(preview)))
   end)()
 end
