@@ -42,6 +42,7 @@ return function(opts)
         term.green .. capture[i*2 - 1] .. term.reset
     )
     end
+    table.sort(res)
   end
 
   vim.system(cmd, { text = true, cwd = vim.g.antora_docs_root }, on_exit):wait()
