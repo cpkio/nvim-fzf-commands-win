@@ -13,12 +13,37 @@ local fzfwinopts = {
   noautocmd = true
 }
 
+-- "Class"
+-- "Color"
+-- "Constant"
+-- "Constructor"
+-- "Enum"
+-- "EnumMember"
+-- "Event"
+-- "Field"
+-- "File"
+-- "Folder"
+-- "Function"
+-- "Interface"
+-- "Keyword"
+-- "Method"
+-- "Module"
+-- "Operator"
+-- "Property"
+-- "Reference"
+-- "Snippet"
+-- "Struct"
+-- "Text"
+-- "TypeParameter"
+-- "Unit"
+-- "Value"
+-- "Variable"
 local kind_to_color = {
   ["Class"] = "blue",
   ["Constant"] = "cyan",
   ["Field"] = "yellow",
-  ["Interface"] = "yellow",
   ["Function"] = "green",
+  ["Interface"] = "yellow",
   ["Method"] ="green",
   ["Module"] = "magenta",
   ["Property"] = "yellow",
