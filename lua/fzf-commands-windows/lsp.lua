@@ -1,6 +1,7 @@
 local vim, fn, api = vim, vim.fn, vim.api
 
 local term = require'fzf-commands-windows.term'
+local utils = require'fzf-commands-windows.utils'
 
 local strings = require("plenary.strings")
 
@@ -54,8 +55,8 @@ local kind_to_color = {
 local diag_to_color = {
   ["Error"] = term.brightmagenta,
   ["Warning"] = term.yellow,
-  ["Info"] = term.brightred,
-  ["Hint"] = term.brightcyan
+  ["Information"] = term.blue,
+  ["Hint"] = term.white
 }
 
 local M = {}
@@ -96,7 +97,7 @@ end
 
 local function fnamemodify(filename, include_filename)
   if include_filename and filename ~= nil then
-    return fn.fnamemodify(filename, ":~:.") .. ":"
+    return fn.fnamemodify(filename, ":~:.")
   else
     return ""
   end
@@ -259,12 +260,12 @@ end
 -- Эта функция вызывается только в M.diagnostic
 local function joindiag_pretty(e, include_filename)
   return diag_to_color[e["type"]]
-    .. e["lnum"]
-    .. ": "
-    .. '(' .. e["type"] .. ') '
-    .. e["text"]:gsub("%s", " ")
+    .. string.format("%4d", e["lnum"])
     .. delim
-    .. fnamemodify(e["filename"], include_filename)
+    .. utils.pad(e["type"], 16) .. delim
+    .. e["text"]:gsub("%s", " ")
+    -- .. delim
+    -- .. fnamemodify(e["filename"], include_filename)
     .. term.reset
 end
 
