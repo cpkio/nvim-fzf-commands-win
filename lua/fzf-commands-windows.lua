@@ -23,5 +23,7 @@ M.directories = run_module("fzf-commands-windows.directories")
 M.pgrep = run_module("fzf-commands-windows.pgrep")
 M.bookmarks = run_module("fzf-commands-windows.bookmarks")
 M.gitbranch = run_module("fzf-commands-windows.gitbranch")
+M.gitfiles = run_module("fzf-commands-windows.gitfiles")
+M.gitfileslastcommitted = run_module("fzf-commands-windows.gitfileslastcommitted")
 
 return M
