@@ -28,7 +28,7 @@ return function(opts)
   coroutine.wrap(function ()
     local fname = fn.fnamemodify(api.buf_get_name(0), ":t")
     local gitsrc = 'git log --all --color=always --pretty=format:"%C(green)%cs%C(reset)' .. utils.delim .. '%C(cyan)%h%C(reset)' .. utils.delim ..'%s' .. utils.delim .. '%d" -- *' .. fname
-    local fzfpreview = 'git diff -R {2} -- *' .. fname .. ' | delta --wrap-max-lines=unlimited ' ..
+    local fzfpreview = 'git diff -R {2} -- *' .. fname .. ' | delta --side-by-side --wrap-max-lines=unlimited ' ..
     '--file-style=white                               ' ..
 
     '--minus-style=brightred                          ' ..
@@ -50,6 +50,7 @@ return function(opts)
     '--line-numbers-minus-style=brightred             ' ..
     '--line-numbers-zero-style=white                  ' ..
     '--line-numbers-plus-style=yellow                 ' ..
+    '--hunk-header-decoration-style=ul                ' ..
     '--width=%FZF_PREVIEW_COLUMNS%'
     local fzfcommand = term.fzf_colors .. ' --ansi --prompt="GDiff> " --delimiter="' .. utils.delim .. '" --preview-window=up:border-none --preview=' .. fn.shellescape(fzfpreview)
     local choices = opts.fzf(gitsrc, fzfcommand)
