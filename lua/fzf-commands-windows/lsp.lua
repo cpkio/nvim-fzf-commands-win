@@ -439,7 +439,7 @@ local function fzf_locations(header, prompt, source, infile)
       local bufnum = api.nvim_get_current_buf()
       local itemsqf = {}
       for j = 1, #lines do
-        local linenum, line = string.match(lines[j], '^%s*(%d+):%s*(%S.+)')
+        local linenum, line = string.match(lines[j], '^%s*(%d+)%s*(%S.+)')
         table.insert(itemsqf, { bufnr = bufnum, lnum = tonumber(linenum), text = line })
       end
       fn.setqflist({},' ',{ id = 'FzfDiag', items = itemsqf, title = 'FzfDiag'})
