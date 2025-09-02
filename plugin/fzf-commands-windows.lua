@@ -17,6 +17,14 @@ vim.api.nvim_create_user_command('PGrep',
   { nargs = 1 }
 )
 
+vim.api.nvim_create_user_command('PGrepGlob',
+  function(opts)
+    require("fzf-commands-windows").pgrepglob({
+      fzf = fzfcmd }, opts.args)
+  end,
+  { nargs = 1 }
+)
+
 vim.api.nvim_create_user_command('Rg',
   function(opts)
     require("fzf-commands-windows").rg({
