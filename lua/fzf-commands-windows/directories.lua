@@ -2,12 +2,19 @@ local utils = require "fzf-commands-windows.utils"
 local term = require "fzf-commands-windows.term"
 local fn, api = utils.helpers()
 
+local path_sep = package.config:sub(1,1)
+
+local base_path = '..' .. path_sep ..
+                  '..' .. path_sep ..
+                  '..' .. path_sep ..
+                  '..'
+
 return function(opts)
 
   opts = utils.normalize_opts(opts)
   local command
   if fn.executable("fd") == 1 then
-    command = 'fd --no-ignore --color=never --type=directory -d 8 --base-directory="..\\..\\..\\.."'
+    command = 'fd --no-ignore --color=never --type=directory -d 8 --base-directory="' .. base_path .. '"'
   end
 
   coroutine.wrap(function ()
@@ -25,7 +32,8 @@ return function(opts)
       vimcmd = "tcd"
     end
 
-    vim.cmd(vimcmd .. " " .. fn.fnameescape('..\\..\\..\\..\\' .. choice[2]))
+    print(base_path .. choice[2])
+    vim.cmd(vimcmd .. " " .. fn.fnameescape(base_path .. path_sep .. choice[2]))
 
   end)()
 end
