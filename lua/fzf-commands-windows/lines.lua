@@ -24,7 +24,7 @@ return function(options)
     local reglist = ('%s'):format(api.exec('buffers', { output = true }))
 
     for line in reglist:gmatch('([^\n]*)\n?') do
-      local bufnum, status, _, filepath, _ = string.match(line, '^%s*(%d+)%s+(%p?)(%w)%s+"([^"]+)"%s*line%s*(%d+)')
+      local bufnum, status, _, filepath, _ = string.match(line, '^%s*(%d+)%s+(%p?)(%l)%s+%+?%s+"([^"]+)"%s+line%s+(%d+)')
       if bufnum then
         if filepath == "" then
           filepath = "[No name]"
