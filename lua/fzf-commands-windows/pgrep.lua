@@ -28,9 +28,19 @@ local _return = vim.schedule_wrap(function(data, opts)
 
   local items = { term.green .. 'ENTER' .. term.reset .. ' to expand entry locations to QuickFix list' }
 
-  for k, v in pairs(_uniques) do
+  local function by_match(a, b)
+    return a < b
+  end
+
+  local _keys = {}
+  for _key in pairs(_uniques) do
+      table.insert(_keys, _key)
+  end
+  table.sort(_keys)
+
+  for _, k in ipairs(_keys) do
     table.insert(items,
-      term.green .. '('.. v.count ..')' .. term.reset ..
+      term.green .. '('.. _uniques[k].count ..')' .. term.reset ..
       utils.delim ..
       term.blue .. k .. term.reset
     )
@@ -40,7 +50,7 @@ local _return = vim.schedule_wrap(function(data, opts)
   local prompt = 'Uniques> '
 
   coroutine.wrap(function()
-    local choices = opts.fzf(items, term.fzf_colors .. ' --header-lines=1 --multi --delimiter="' .. utils.delim .. '" --nth=2 --ansi --prompt="' .. prompt .. '"')
+    local choices = opts.fzf(items, term.fzf_colors .. ' --header-lines=1 --multi --delimiter="' .. utils.delim .. '" --nth=2 --no-sort --tac --ansi --prompt="' .. prompt .. '"')
 
     if not choices then return end
 
